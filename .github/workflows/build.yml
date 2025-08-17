@@ -5,8 +5,6 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  release:
-    types: [published]
 
 jobs:
   build:
@@ -122,72 +120,3 @@ jobs:
             index.js
             index.d.ts
           retention-days: 30
-
-  # 创建发布包
-  create-release:
-    needs: [build, build-android]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Create release package
-        run: |
-          mkdir -p release
-
-          # 复制基础文件
-          cp index.js index.d.ts package.json README.md LICENSE release/
-
-          # 复制所有平台的 .node 文件
-          for platform in artifacts/*/; do
-            platform_name=$(basename "$platform")
-            cp "$platform"/*.node "release/bsdiff-rust.$platform_name.node"
-          done
-
-          # 创建发布压缩包
-          cd release
-          tar -czf "../bsdiff-rust-${{ github.event.release.tag_name }}.tar.gz" .
-          zip -r "../bsdiff-rust-${{ github.event.release.tag_name }}.zip" .
-
-      - name: Upload release assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./bsdiff-rust-${{ github.event.release.tag_name }}.tar.gz
-          asset_name: bsdiff-rust-${{ github.event.release.tag_name }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload release assets (zip)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./bsdiff-rust-${{ github.event.release.tag_name }}.zip
-          asset_name: bsdiff-rust-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
