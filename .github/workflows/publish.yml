@@ -34,14 +34,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
+          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -49,7 +43,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build native addon
         run: napi build --target ${{ matrix.target }} --release
@@ -84,17 +78,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
+          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Prepare package
         run: |
@@ -102,6 +90,6 @@ jobs:
           cp index.js index.d.ts package.json README.md LICENSE ./
 
       - name: Publish to npm
-        run: pnpm publish --no-git-checks
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

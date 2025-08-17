@@ -23,25 +23,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
+          cache: 'npm'
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
-      - name: Build for current platform
-        run: pnpm run build:current
+      - name: Build for platform
+        run: npm run build
 
       - name: Run tests
-        run: pnpm test
+        run: npm test
 
   lint:
     runs-on: ubuntu-latest
@@ -54,19 +48,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run linter
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Format check
-        run: pnpm run format
+        run: npm run format
