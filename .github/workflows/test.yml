@@ -26,9 +26,10 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v2
         with:
           version: 9
+          run_install: false
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -56,9 +57,10 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v2
         with:
           version: 9
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
