@@ -19,7 +19,7 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 
 ### 安装
 
-```bash
+```js
 npm install bsdiff-rust
 ```
 
@@ -51,7 +51,9 @@ diffSync('old-file.zip', 'new-file.zip', 'patch.bin')
 
 ### 同步 API
 
-#### `diffSync(oldFile: string, newFile: string, patchFile: string): void`
+```js
+diffSync(oldFile: string, newFile: string, patchFile: string): void
+```
 
 生成两个文件之间的补丁。
 
@@ -59,7 +61,9 @@ diffSync('old-file.zip', 'new-file.zip', 'patch.bin')
 - `newFile`: 新文件路径
 - `patchFile`: 补丁文件输出路径
 
-#### `patchSync(oldFile: string, newFile: string, patchFile: string): void`
+```js
+patchSync(oldFile: string, newFile: string, patchFile: string): void
+```
 
 应用补丁到旧文件，生成新文件。
 
@@ -69,11 +73,15 @@ diffSync('old-file.zip', 'new-file.zip', 'patch.bin')
 
 ### 异步 API
 
-#### `diff(oldFile: string, newFile: string, patchFile: string): Promise<void>`
+```js
+diff(oldFile: string, newFile: string, patchFile: string): Promise<void>
+```
 
 异步生成补丁。
 
-#### `patch(oldFile: string, newFile: string, patchFile: string): Promise<void>`
+```js
+patch(oldFile: string, newFile: string, patchFile: string): Promise<void>
+```
 
 异步应用补丁。
 
@@ -184,10 +192,6 @@ bsdiff-rust/
 └── *.node                  # 原生模块
 ```
 
-## 🤝 贡献
-
-欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
-
 ### 开发流程
 
 1. Fork 项目
@@ -196,21 +200,12 @@ bsdiff-rust/
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 打开 Pull Request
 
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 🙏 致谢
+## Reference
 
 - [bsdiff](http://www.daemonology.net/bsdiff/) - 原始算法
 - [NAPI-RS](https://napi.rs/) - Node.js 绑定框架
 - [Rust](https://www.rust-lang.org/) - 系统编程语言
-
-## 📞 支持
-
-如果您遇到问题或有建议，请：
-
-- 📧 发送邮件到: sumin1500160640@gmail.com
+- [bsdiff-node](https://github.com/gaetandezeiraud/bsdiff-node) - 原始仓库
 
 ---
 

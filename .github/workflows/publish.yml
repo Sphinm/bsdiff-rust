@@ -111,7 +111,7 @@ jobs:
         run: |
           # 复制基础文件
           # cp index.js index.d.ts package.json README.md LICENSE ./
-          # ls -a
+          ls -a
 
       - name: Publish to npm
         run: npm publish
