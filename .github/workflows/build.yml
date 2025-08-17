@@ -62,7 +62,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build native addon
-        run: pnpm exec napi build --target ${{ matrix.target }} --release ${{ matrix.flags }}
+        run: pnpm exec napi build --target ${{ matrix.target }} --platform --release ${{ matrix.flags }}
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
@@ -108,7 +108,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build Android native addon
-        run: pnpm exec napi build --target aarch64-linux-android --release
+        run: pnpm exec napi build --target --platform aarch64-linux-android --release
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}

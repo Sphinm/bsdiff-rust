@@ -59,7 +59,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build native addon
-        run: pnpm exec napi build --target ${{ matrix.target }} --release ${{ matrix.flags }}
+        run: pnpm exec napi build --target ${{ matrix.target }} --platform --release ${{ matrix.flags }}
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
