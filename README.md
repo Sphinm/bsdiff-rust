@@ -4,7 +4,7 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 
 [![npm version](https://badge.fury.io/js/bsdiff-rust.svg)](https://badge.fury.io/js/bsdiff-rust)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://github.com/your-username/bsdiff-rust/actions/workflows/rust.yml/badge.svg)](https://github.com/your-username/bsdiff-rust/actions/workflows/rust.yml)
+[![Rust](https://github.com/Sphinm/bsdiff-rust/actions/workflows/rust.yml/badge.svg)](https://github.com/Sphinm/bsdiff-rust/actions/workflows/rust.yml)
 
 ## ✨ 特性
 
@@ -133,7 +133,7 @@ pnpm lint
 | 场景           | 文件大小          | 处理时间 | 补丁大小 |
 | -------------- | ----------------- | -------- | -------- |
 | React 版本更新 | 1.31 MB → 1.86 MB | ~560ms   | 785 KB   |
-| 小文件测试     | 100KB             | ~5ms     | - |
+| 小文件测试     | 100KB             | ~5ms     | -        |
 
 ## 🏗️ 技术架构
 
