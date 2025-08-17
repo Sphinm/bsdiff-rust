@@ -113,8 +113,9 @@ jobs:
           for platform in artifacts/*/; do
             platform_name=$(basename "$platform")
             if [ -f "$platform"/*.node ]; then
-              cp "$platform"/*.node "./bsdiff-rust.$platform_name.node"
-              echo "Copied: bsdiff-rust.$platform_name.node"
+              # 直接复制 .node 文件，保持原始文件名
+              cp "$platform"/*.node ./
+              echo "Copied: $(basename "$platform"/*.node)"
             else
               echo "Warning: No .node file found in $platform"
             fi
