@@ -30,7 +30,6 @@
       "aarch64-unknown-linux-gnu",
       "aarch64-apple-darwin",
       "aarch64-linux-android",
-      "aarch64-unknown-linux-musl",
       "aarch64-pc-windows-msvc"
     ]
   },
@@ -41,7 +40,6 @@
     "bsdiff-rust-linux-arm64-gnu": "1.0.0",
     "bsdiff-rust-darwin-arm64": "1.0.0",
     "bsdiff-rust-android-arm64": "1.0.0",
-    "bsdiff-rust-linux-arm64-musl": "1.0.0",
     "bsdiff-rust-win32-arm64-msvc": "1.0.0"
   },
   "engines": {
