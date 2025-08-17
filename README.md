@@ -4,7 +4,6 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 
 [![npm version](https://badge.fury.io/js/bsdiff-rust.svg)](https://badge.fury.io/js/bsdiff-rust)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Rust](https://github.com/Sphinm/bsdiff-rust/actions/workflows/rust.yml/badge.svg)](https://github.com/Sphinm/bsdiff-rust/actions/workflows/rust.yml)
 
 ## ✨ 特性
 
