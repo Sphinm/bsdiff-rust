@@ -1,94 +1,59 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
   workflow_run:
     workflows: ['Build Native Addons']
     types: [completed]
 
 jobs:
-  build-and-publish:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            node-version: '18'
-            flags: '--use-napi-cross'
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            node-version: '18'
-            flags: '--use-napi-cross'
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            node-version: '18'
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            node-version: '18'
-          - os: macos-15
-            target: x86_64-apple-darwin
-            node-version: '18'
-          - os: macos-15
-            target: aarch64-apple-darwin
-            node-version: '18'
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Build native addon
-        run: pnpm exec napi build --target ${{ matrix.target }} --platform --release ${{ matrix.flags }}
-        env:
-          CARGO_NET_GIT_FETCH_WITH_CLI: true
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.target }}
-          path: |
-            *.node
-            index.js
-            index.d.ts
-            package.json
-          retention-days: 30
-
   publish:
-    needs: build-and-publish
+    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'refs/tags/') }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Download build artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // 获取 workflow run 的 artifacts
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+
+            // 下载每个 artifact
+            for (const artifact of artifacts.data.artifacts) {
+              console.log(`Downloading artifact: ${artifact.name}`);
+              const download = await github.rest.actions.downloadArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+                archive_format: 'zip',
+              });
+              
+              // 保存 zip 文件
+              const zipPath = path.join(process.env.GITHUB_WORKSPACE, `${artifact.name}.zip`);
+              fs.writeFileSync(zipPath, Buffer.from(download.data));
+              
+              // 解压到对应目录
+              const extractPath = path.join(process.env.GITHUB_WORKSPACE, artifact.name);
+              if (!fs.existsSync(extractPath)) {
+                fs.mkdirSync(extractPath, { recursive: true });
+              }
+              
+              // 使用 unzip 命令解压
+              const { execSync } = require('child_process');
+              execSync(`unzip -o "${zipPath}" -d "${extractPath}"`);
+            }
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -107,25 +72,74 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Prepare npm package
+      - name: Get version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create platform packages
         run: |
-          # 复制所有平台的 .node 文件到根目录
-          for platform in artifacts/*/; do
+          # 创建 npm 目录
+          mkdir -p npm
+
+          # 为每个平台创建独立的包
+          for platform in */; do
             platform_name=$(basename "$platform")
             if [ -f "$platform"/*.node ]; then
-              # 直接复制 .node 文件，保持原始文件名
-              cp "$platform"/*.node ./
-              echo "Copied: $(basename "$platform"/*.node)"
-            else
-              echo "Warning: No .node file found in $platform"
+              echo "Creating package for platform: $platform_name"
+              
+              # 创建平台包目录
+              mkdir -p "npm/$platform_name"
+              
+              # 获取 .node 文件名
+              node_file=$(basename "$platform"/*.node)
+              
+              # 复制 .node 文件
+              cp "$platform"/*.node "npm/$platform_name/"
+              
+              # 创建平台特定的 package.json
+              node -e "
+                const pkg = {
+                  name: 'bsdiff-rust-$platform_name',
+                  version: '${{ steps.version.outputs.version }}',
+                  main: '$node_file',
+                  files: ['$node_file'],
+                  license: 'MIT',
+                  engines: { node: '>= 6.14.2' }
+                };
+                require('fs').writeFileSync('npm/$platform_name/package.json', JSON.stringify(pkg, null, 2));
+              "
+              
+              # 创建 README
+              echo "# bsdiff-rust-$platform_name" > "npm/$platform_name/README.md"
+              echo "" >> "npm/$platform_name/README.md"
+              echo "Platform-specific binary for $platform_name." >> "npm/$platform_name/README.md"
+              echo "" >> "npm/$platform_name/README.md"
+              echo "This package contains the native addon binary for the $platform_name platform." >> "npm/$platform_name/README.md"
+              
+              echo "Created package: npm/$platform_name"
             fi
           done
 
-          # 列出最终文件结构
-          echo "Final package structure:"
-          ls -la
+          # 列出创建的包
+          echo "Created platform packages:"
+          ls -la npm/
 
-      - name: Publish to npm
-        run: npm publish
+      - name: Publish main package
+        run: |
+          # 发布主包（不包含二进制文件）
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish platform packages
+        run: |
+          # 发布每个平台的包
+          for platform in npm/*/; do
+            platform_name=$(basename "$platform")
+            echo "Publishing platform package: $platform_name"
+            cd "npm/$platform_name"
+            npm publish
+            cd ../..
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
