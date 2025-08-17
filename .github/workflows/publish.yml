@@ -109,9 +109,6 @@ jobs:
 
       - name: Prepare npm package
         run: |
-          # 复制基础文件
-          cp index.js index.d.ts package.json README.md LICENSE ./
-
           # 复制所有平台的 .node 文件到根目录
           for platform in artifacts/*/; do
             platform_name=$(basename "$platform")
