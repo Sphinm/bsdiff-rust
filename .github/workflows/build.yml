@@ -21,10 +21,10 @@ jobs:
             target: aarch64-unknown-linux-gnu
             node-version: '18'
             flags: '--use-napi-cross'
-          - os: windows-latest
+          - os: windows-2025
             target: x86_64-pc-windows-msvc
             node-version: '18'
-          - os: windows-latest
+          - os: windows-2025
             target: aarch64-pc-windows-msvc
             node-version: '18'
           - os: macos-15
@@ -108,7 +108,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build Android native addon
-        run: pnpm exec napi build --target --platform aarch64-linux-android --release
+        run: pnpm exec napi build --target aarch64-linux-android --platform --release
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
