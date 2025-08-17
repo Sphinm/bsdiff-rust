@@ -1,6 +1,6 @@
 {
   "name": "bsdiff-rust",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -19,7 +19,8 @@
   ],
   "files": [
     "index.d.ts",
-    "index.js"
+    "index.js",
+    "*.node"
   ],
   "napi": {
     "binaryName": "bsdiff-rust",
@@ -71,10 +72,10 @@
     "chalk": "^5.4.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
+    "mocha": "^10.2.0",
     "npm-run-all2": "^8.0.4",
     "oxlint": "^1.8.0",
     "prettier": "^3.6.2",
-    "mocha": "^10.2.0",
     "typescript": "^5.8.3"
   },
   "lint-staged": {

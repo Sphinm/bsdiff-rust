@@ -20,10 +20,10 @@ jobs:
             target: aarch64-unknown-linux-gnu
             node-version: '18'
             flags: '--use-napi-cross'
-          - os: windows-2025
+          - os: windows-latest
             target: x86_64-pc-windows-msvc
             node-version: '18'
-          - os: windows-2025
+          - os: windows-latest
             target: aarch64-pc-windows-msvc
             node-version: '18'
           - os: macos-15
@@ -48,7 +48,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
           registry-url: 'https://registry.npmjs.org'
@@ -77,7 +77,7 @@ jobs:
             package.json
           retention-days: 30
 
-  prepublish:
+  publish:
     needs: build-and-publish
     runs-on: ubuntu-latest
 
@@ -107,11 +107,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Prepare package
+      - name: Prepare npm package
         run: |
           # 复制基础文件
-          # cp index.js index.d.ts package.json README.md LICENSE ./
-          ls -a
+          cp index.js index.d.ts package.json README.md LICENSE ./
+
+          # 复制所有平台的 .node 文件到根目录
+          for platform in artifacts/*/; do
+            platform_name=$(basename "$platform")
+            if [ -f "$platform"/*.node ]; then
+              cp "$platform"/*.node "./bsdiff-rust.$platform_name.node"
+              echo "Copied: bsdiff-rust.$platform_name.node"
+            else
+              echo "Warning: No .node file found in $platform"
+            fi
+          done
+
+          # 列出最终文件结构
+          echo "Final package structure:"
+          ls -la
 
       - name: Publish to npm
         run: npm publish
