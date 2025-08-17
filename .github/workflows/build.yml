@@ -60,7 +60,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build native addon
         run: napi build --target ${{ matrix.target }} --release
@@ -106,7 +106,7 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Android native addon
         run: napi build --target aarch64-linux-android --release
@@ -153,7 +153,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Create release package
         run: |
