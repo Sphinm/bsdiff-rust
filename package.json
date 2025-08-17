@@ -1,0 +1,99 @@
+{
+  "name": "bsdiff-rust",
+  "version": "1.0.0",
+  "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "keywords": [
+    "bsdiff",
+    "bspatch",
+    "binary-diff",
+    "binary-patch",
+    "rust",
+    "napi-rs",
+    "NAPI",
+    "N-API",
+    "compression",
+    "bzip2"
+  ],
+  "files": [
+    "index.d.ts",
+    "index.js"
+  ],
+  "napi": {
+    "binaryName": "bsdiff-rust",
+    "targets": [
+      "x86_64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu",
+      "aarch64-apple-darwin",
+      "aarch64-linux-android",
+      "aarch64-unknown-linux-musl",
+      "aarch64-pc-windows-msvc"
+    ]
+  },
+  "optionalDependencies": {
+    "bsdiff-rust-darwin-x64": "1.0.0",
+    "bsdiff-rust-win32-x64-msvc": "1.0.0",
+    "bsdiff-rust-linux-x64-gnu": "1.0.0",
+    "bsdiff-rust-linux-arm64-gnu": "1.0.0",
+    "bsdiff-rust-darwin-arm64": "1.0.0",
+    "bsdiff-rust-android-arm64": "1.0.0",
+    "bsdiff-rust-linux-arm64-musl": "1.0.0",
+    "bsdiff-rust-win32-arm64-msvc": "1.0.0"
+  },
+  "engines": {
+    "node": ">= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release",
+    "build:arm64": "napi build --platform --target aarch64-apple-darwin --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm",
+    "format": "run-p format:prettier format:rs format:toml",
+    "format:prettier": "prettier . -w",
+    "format:toml": "taplo format",
+    "format:rs": "cargo fmt",
+    "lint": "oxlint .",
+    "test": "mocha test/test.js",
+    "version": "napi version",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.0.3",
+    "@oxc-node/core": "^0.0.32",
+    "@taplo/cli": "^0.7.0",
+    "chalk": "^5.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "oxlint": "^1.8.0",
+    "prettier": "^3.6.2",
+    "mocha": "^10.2.0",
+    "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "*.@(js|ts|tsx)": [
+      "oxlint --fix"
+    ],
+    "*.@(js|ts|tsx|yml|yaml|md|json)": [
+      "prettier --write"
+    ],
+    "*.toml": [
+      "taplo format"
+    ]
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": false,
+    "trailingComma": "all",
+    "singleQuote": true,
+    "arrowParens": "always"
+  }
+}
