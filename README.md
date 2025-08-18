@@ -174,6 +174,100 @@ pnpm lint
 - ⚡ **零成本抽象**: 高性能保证
 - 🎯 **现代化**: 使用最新的技术栈
 
+## 🌍 跨平台编译方案对比
+
+本项目采用现代化的 Rust + napi-rs 方案，相比传统的 node-gyp 方案有显著优势。
+
+### 技术栈对比
+
+| 项目            | 技术栈           | 跨平台方案   | 优势     | 劣势           |
+| --------------- | ---------------- | ------------ | -------- | -------------- |
+| **bsdiff-node** | C/C++ + node-gyp | 源码编译     | 成熟稳定 | 需要编译环境   |
+| **bsdiff-rust** | Rust + napi-rs   | 预编译二进制 | 性能更好 | 需要管理多个包 |
+
+### bsdiff-node (传统方案)
+
+**技术特点：**
+
+- 使用 C/C++ 实现 (95.3% C + 3.7% C++)
+- 依赖 node-gyp 进行跨平台编译
+- 需要 Python 3.x 和 C++ 编译器
+- 单一 npm 包管理
+
+**优点：**
+
+- ✅ **单一包**：用户只需要安装一个包
+- ✅ **自动适配**：node-gyp 自动处理平台差异
+- ✅ **成熟稳定**：node-gyp 是 Node.js 生态的标准方案
+
+**缺点：**
+
+- ❌ **编译时间长**：每次安装都需要编译
+- ❌ **环境依赖**：需要 Python、C++ 编译器
+- ❌ **安装失败率高**：编译环境问题导致安装失败
+- ❌ **性能一般**：C/C++ 实现，不如 Rust 优化
+
+### bsdiff-rust (现代化方案)
+
+**技术特点：**
+
+- 使用 Rust 实现，性能优异
+- 采用 napi-rs 进行 Node.js 绑定
+- 预编译二进制，无需编译环境
+- 多包策略，按需下载
+
+**优点：**
+
+- ✅ **性能优异**：Rust 实现，性能更好
+- ✅ **安装快速**：预编译二进制，无需编译
+- ✅ **内存安全**：Rust 保证内存安全
+- ✅ **现代化**：使用最新的技术栈
+
+**缺点：**
+
+- ❌ **包管理复杂**：需要管理多个平台包
+- ❌ **包体积**：虽然按需下载，但需要维护多个包
+
+### 为什么选择 Rust + napi-rs
+
+1. **性能优势**：Rust 实现比 C/C++ 更安全、性能更好
+2. **用户体验**：预编译二进制安装更快、更稳定
+3. **维护性**：Rust 代码更易维护，bug 更少
+4. **现代化**：符合当前 Node.js 生态的发展趋势
+
+### 多包策略的优势
+
+本项目采用 napi-rs 的多包策略：
+
+```
+npm/
+├── darwin-arm64/          # macOS ARM64 平台包
+├── darwin-x64/           # macOS x64 平台包
+├── linux-arm64-gnu/      # Linux ARM64 glibc 平台包
+├── linux-x64-gnu/        # Linux x64 glibc 平台包
+├── win32-arm64-msvc/     # Windows ARM64 平台包
+├── win32-x64-msvc/       # Windows x64 平台包
+└── ...                   # 其他平台
+```
+
+**用户安装体验：**
+
+```bash
+# 用户在 macOS ARM64 上运行
+npm install bsdiff-rust
+
+# npm 自动安装：
+# 1. bsdiff-rust@1.0.3 (主包)
+# 2. bsdiff-rust-darwin-arm64@1.0.3 (平台包)
+```
+
+**优势：**
+
+- 🚀 **按需下载**：用户只下载对应平台的二进制文件
+- ⚡ **安装快速**：无需编译，直接下载预编译二进制
+- 🛡️ **稳定可靠**：避免编译环境问题导致的安装失败
+- 📦 **体积优化**：减小了总体包体积
+
 ## 📁 项目结构
 
 ```
@@ -205,7 +299,7 @@ bsdiff-rust/
 - [bsdiff](http://www.daemonology.net/bsdiff/) - 原始算法
 - [NAPI-RS](https://napi.rs/) - Node.js 绑定框架
 - [Rust](https://www.rust-lang.org/) - 系统编程语言
-- [bsdiff-node](https://github.com/gaetandezeiraud/bsdiff-node) - 原始仓库
+- [bsdiff-node](https://github.com/gaetandezeiraud/bsdiff-node) - 传统 C/C++ 实现（已归档）
 
 ---
 
