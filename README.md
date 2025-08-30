@@ -15,6 +15,8 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 - 🎯 **跨平台**: 支持 Windows、macOS、Linux
 - 📱 **Node.js 绑定**: 完整的 JavaScript/TypeScript 支持
 
+TODO: Windows 构建时间过长，先忽略
+
 ## 🚀 快速开始
 
 ### 安装

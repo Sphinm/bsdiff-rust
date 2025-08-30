@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const bsdiff = require('../index')
 
-describe('bsdiff (rust)', () => {
+describe('bsdiff (rust)', function () {
   const resDir = path.join(__dirname, 'resources')
   const oldFile = path.join(resDir, 'react-0.3-stable.zip')
   const newFile = path.join(resDir, 'react-0.4-stable.zip')
