@@ -112,10 +112,36 @@ jobs:
           echo "Created directories:"
           ls -la npm/
 
+      - name: Debug GitHub access
+        run: |
+          echo "=== GitHub Token 诊断 ==="
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Token available: ${GITHUB_TOKEN:+Yes}"
+          echo "Testing GitHub API access..."
+
+          # 测试基本API访问
+          if curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/$GITHUB_REPOSITORY" > /tmp/repo_info.json; then
+            echo "✅ API访问成功"
+            echo "仓库权限: $(jq -r '.permissions // "无权限信息"' /tmp/repo_info.json)"
+          else
+            echo "❌ API访问失败"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run napi prepublish
         run: |
           echo "Running napi prepublish..."
-          pnpm run prepublishOnly
+          if ! pnpm run prepublishOnly; then
+            echo "❌ napi prepublish failed (GitHub release 404), using fallback..."
+            echo "Creating platform packages manually..."
+            pnpm exec napi artifacts
+            echo "✅ Fallback completed"
+          else
+            echo "✅ napi prepublish succeeded"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
