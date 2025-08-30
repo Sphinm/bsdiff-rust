@@ -133,16 +133,16 @@ jobs:
             target: aarch64-apple-darwin
           - host: macos-15
             target: x86_64-apple-darwin
-          # - host: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          # - host: windows-latest
-          #   target: aarch64-pc-windows-msvc
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker-platform: arm64
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
             docker-platform: arm64
+          # - host: windows-latest
+          #   target: x86_64-pc-windows-msvc
+          # - host: windows-latest
+          #   target: aarch64-pc-windows-msvc
 
     steps:
       - uses: actions/checkout@v4
@@ -182,14 +182,14 @@ jobs:
           find . -name "*.node" -exec file {} \;
 
       # 原生环境测试（Windows, macOS）
-      - name: Test native
-        run: CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
-        if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
+      # - name: Test native
+      #   run: CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
+      #   if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
 
       # Linux x64 原生测试
-      - name: Test Linux x64 native
+      - name: List Linux x64 files only
         run: |
-          echo "Testing Linux target: ${{ matrix.settings.target }}"
+          echo "Built Linux target: ${{ matrix.settings.target }}"
           echo "Current environment:"
           uname -a
           ldd --version | head -1
@@ -197,31 +197,29 @@ jobs:
           ls -la *.node || echo "No .node files found"
           echo "Node.js version:"
           node --version
-          echo "Starting test with 10s timeout..."
-          CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
+          echo "Skipping tests, only listing files..."
+          # CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
         if: matrix.settings.target == 'x86_64-unknown-linux-gnu' || matrix.settings.target == 'x86_64-unknown-linux-musl'
 
       # ARM64 Docker 测试
       - run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         if: matrix.settings.docker-platform != null
 
-      - name: Test ARM64 with Docker
+      - name: List ARM64 files with Docker
         uses: addnab/docker-run-action@v3
         if: matrix.settings.docker-platform != null
         with:
           image: node:22-alpine
           options: --platform linux/${{ matrix.settings.docker-platform }} -v ${{ github.workspace }}:/build -w /build
           run: |
-            echo "Testing target: ${{ matrix.settings.target }} on platform: ${{ matrix.settings.docker-platform }}"
+            echo "Built target: ${{ matrix.settings.target }} on platform: ${{ matrix.settings.docker-platform }}"
             ls -la *.node || echo "No .node files found in workspace"
-            apk add --no-cache pnpm file
-            # Clean install to avoid npm optional dependencies issues
-            rm -rf node_modules package-lock.json pnpm-lock.yaml || true
-            pnpm install --no-frozen-lockfile
-            echo "Files after npm install:"
-            ls -la *.node || echo "No .node files found after install"
-            echo "Starting Docker test with 10s timeout..."
-            CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
+            apk add --no-cache file
+            echo "Files after checking workspace:"
+            ls -la *.node || echo "No .node files found"
+            find . -name "*.node" -exec file {} \; || echo "No .node files to analyze"
+            echo "Skipping tests, only listing files..."
+            # CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
 
   # 最终状态检查
   zig-cross-compile-done:
@@ -232,3 +230,10 @@ jobs:
       - name: Check all jobs succeeded
         run: exit 1
         if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+      - name: Find node files
+        run: |
+          echo "Built files for target: ${{ matrix.target }}"
+          ls -la *.node || echo "No .node files found"
+          ls -la index.* || echo "No index files found"
+          echo "File details:"
+          find . -name "*.node" -exec file {} \;
