@@ -234,7 +234,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: test
-    if: ${{ needs.test.result == 'success' && github.event.workflow_run.event == 'push' }}
+    # if: ${{ needs.test.result == 'success' && github.event.workflow_run.event == 'push' }}
     # 只在版本标签推送且构建成功时发布
 
     steps:
