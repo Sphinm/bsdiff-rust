@@ -1,4 +1,11 @@
-name: Build Native Addons
+name: Zig-Cross-Compile
+
+env:
+  DEBUG: 'napi:*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
@@ -10,35 +17,26 @@ on:
 
 jobs:
   build:
+    name: Zig-Cross-Compile-On-Linux
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            node-version: '18'
-            flags: '--use-napi-cross'
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            node-version: '18'
-            flags: '--use-napi-cross'
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            node-version: '18'
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            node-version: '18'
-          - os: macos-15
-            target: x86_64-apple-darwin
-            node-version: '18'
-          - os: macos-15
-            target: aarch64-apple-darwin
-            node-version: '18'
-
-    runs-on: ${{ matrix.os }}
+        target:
+          [
+            'aarch64-apple-darwin',
+            'x86_64-apple-darwin',
+            'x86_64-unknown-linux-musl',
+            'aarch64-unknown-linux-musl',
+            'x86_64-unknown-linux-gnu',
+            'aarch64-unknown-linux-gnu',
+            'x86_64-pc-windows-msvc',
+            'aarch64-pc-windows-msvc',
+          ]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -49,22 +47,56 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup Rust
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.80.1
           targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: stable-zig-${{ matrix.target }}-cargo-cache
+
+      - name: Install ziglang
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+
+      - name: Install cargo-zigbuild
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-zigbuild
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build native addon
-        run: pnpm exec napi build --target ${{ matrix.target }} --platform --release ${{ matrix.flags }}
+      - name: install MacOS SDK
+        if: contains(matrix.target, 'apple')
+        run: |
+          curl -L "https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz" | tar -J -x -C /opt
+
+      - name: install Windows msvc tools
+        if: contains(matrix.target, 'windows')
+        run: |
+          sudo apt update
+          sudo apt install -y lld
+
+      - name: Cross build native addon
         env:
-          CARGO_NET_GIT_FETCH_WITH_CLI: true
+          SDKROOT: /opt/MacOSX11.3.sdk
+        run: |
+          pnpm exec napi build --target ${{ matrix.target }} --platform --release --zigbuild
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -76,12 +108,37 @@ jobs:
             index.d.ts
           retention-days: 30
 
-  # 构建 Android 平台（需要特殊处理）
-  build-android:
-    runs-on: ubuntu-latest
+  # 测试交叉编译结果
+  test:
+    name: Test Zig Cross Compiled ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
+    needs:
+      - build
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - host: macos-latest
+            target: aarch64-apple-darwin
+          - host: macos-15
+            target: x86_64-apple-darwin
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+          - host: windows-latest
+            target: aarch64-pc-windows-msvc
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            docker-platform: arm64
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            docker-platform: arm64
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -92,33 +149,56 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 22
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android
-
-      - name: Install Android NDK
-        uses: android-actions/setup-android@v2
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+        if: matrix.settings.docker-platform == null
 
-      - name: Build Android native addon
-        run: pnpm exec napi build --target aarch64-linux-android --platform --release
-        env:
-          CARGO_NET_GIT_FETCH_WITH_CLI: true
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-
-      - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: aarch64-linux-android
-          path: |
-            *.node
-            index.js
-            index.d.ts
-          retention-days: 30
+          name: ${{ matrix.settings.target }}
+          path: ./
+
+      - name: List files
+        run: |
+          ls -la *.node || echo "No .node files found"
+          ls -la index.* || echo "No index files found"
+
+      # 原生环境测试（Windows, macOS）
+      - name: Test native
+        run: pnpm test
+        if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
+
+      # Linux x64 原生测试
+      - name: Test Linux x64 native
+        run: pnpm test
+        if: matrix.settings.target == 'x86_64-unknown-linux-gnu' || matrix.settings.target == 'x86_64-unknown-linux-musl'
+
+      # ARM64 Docker 测试
+      - run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        if: matrix.settings.docker-platform != null
+
+      - name: Test ARM64 with Docker
+        uses: addnab/docker-run-action@v3
+        if: matrix.settings.docker-platform != null
+        with:
+          image: node:22-alpine
+          options: --platform linux/${{ matrix.settings.docker-platform }} -v ${{ github.workspace }}:/build -w /build
+          run: |
+            apk add --no-cache pnpm
+            pnpm install --no-frozen-lockfile
+            pnpm test
+
+  # 最终状态检查
+  zig-cross-compile-done:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - name: Check all jobs succeeded
+        run: exit 1
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
