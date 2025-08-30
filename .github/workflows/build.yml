@@ -96,7 +96,7 @@ jobs:
         env:
           SDKROOT: /opt/MacOSX11.3.sdk
         run: |
-          pnpm exec napi build --target ${{ matrix.target }} --platform --release --zigbuild
+          pnpm exec napi build --target ${{ matrix.target }} --platform --release --cross-compile
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
