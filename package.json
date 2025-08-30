@@ -1,6 +1,6 @@
 {
   "name": "bsdiff-rust",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -88,15 +88,5 @@
     "trailingComma": "all",
     "singleQuote": true,
     "arrowParens": "always"
-  },
-  "optionalDependencies": {
-    "bsdiff-rust-darwin-arm64": "1.0.3",
-    "bsdiff-rust-darwin-x64": "1.0.3",
-    "bsdiff-rust-linux-x64-musl": "1.0.3",
-    "bsdiff-rust-linux-arm64-musl": "1.0.3",
-    "bsdiff-rust-linux-x64-gnu": "1.0.3",
-    "bsdiff-rust-linux-arm64-gnu": "1.0.3",
-    "bsdiff-rust-win32-x64-msvc": "1.0.3",
-    "bsdiff-rust-win32-arm64-msvc": "1.0.3"
   }
 }
