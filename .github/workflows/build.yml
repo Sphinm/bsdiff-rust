@@ -54,7 +54,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.80.1
+          toolchain: stable
           targets: ${{ matrix.target }}
 
       - name: Cache cargo
@@ -64,7 +64,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: stable-zig-${{ matrix.target }}-cargo-cache
+          key: stable-zig-${{ matrix.target }}-cargo-cache-v2
 
       - name: Install ziglang
         uses: mlugg/setup-zig@v1
