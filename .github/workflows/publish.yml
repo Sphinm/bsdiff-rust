@@ -104,43 +104,33 @@ jobs:
             fi
           done
 
-      - name: Prepare for publishing
+      - name: Create npm directories
         run: |
-          # 使用 napi 预发布脚本准备平台包
+          # 创建 npm 目录结构，因为 napi artifacts 需要这些目录存在
+          echo "Creating npm directory structure..."
+          mkdir -p npm/{darwin-arm64,darwin-x64,linux-x64-gnu,linux-x64-musl,linux-arm64-gnu,linux-arm64-musl}
+          echo "Created directories:"
+          ls -la npm/
+
+      - name: Run napi artifacts
+        run: |
+          # 使用 napi artifacts 准备平台包
+          echo "Running napi artifacts..."
           pnpm run prepublishOnly
 
-          # 创建 npm 目录结构
-          mkdir -p npm
-
-          # 复制构建的 artifacts 到对应位置
-          for artifact_dir in artifacts/*/; do
-            if [ -d "$artifact_dir" ]; then
-              platform_name=$(basename "$artifact_dir")
-              echo "Processing platform: $platform_name"
-              
-              # 如果有 .node 文件，复制到 npm 目录
-              if ls "$artifact_dir"/*.node 1> /dev/null 2>&1; then
-                echo "Found .node file for $platform_name"
-                mkdir -p "npm/$platform_name"
-                cp "$artifact_dir"/*.node "npm/$platform_name/"
-                
-                # 检查是否有 index.js 和 index.d.ts
-                if [ -f "$artifact_dir/index.js" ]; then
-                  cp "$artifact_dir/index.js" "npm/$platform_name/"
-                fi
-                if [ -f "$artifact_dir/index.d.ts" ]; then
-                  cp "$artifact_dir/index.d.ts" "npm/$platform_name/"
-                fi
-                
-                echo "Prepared package for $platform_name"
-              else
-                echo "No .node file found for $platform_name"
-              fi
+      - name: Verify npm packages
+        run: |
+          echo "Checking generated npm packages:"
+          ls -la npm/
+          echo ""
+          echo "Contents of each platform:"
+          for dir in npm/*/; do
+            if [ -d "$dir" ]; then
+              echo "=== $(basename "$dir") ==="
+              ls -la "$dir"
+              echo ""
             fi
           done
-
-          echo "Prepared packages:"
-          ls -la npm/
 
       - name: Publish to npm
         run: |
