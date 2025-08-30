@@ -71,10 +71,10 @@ jobs:
         with:
           version: 0.13.0
 
-      - name: Install cargo-zigbuild
+      - name: Install cargo-zigbuild and cargo-xwin
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-zigbuild
+          tool: cargo-zigbuild,cargo-xwin
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -90,7 +90,7 @@ jobs:
         if: contains(matrix.target, 'windows')
         run: |
           sudo apt update
-          sudo apt install -y lld
+          sudo apt install -y lld llvm
 
       - name: Cross build native addon
         env:
