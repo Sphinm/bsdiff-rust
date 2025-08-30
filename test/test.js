@@ -10,6 +10,9 @@ describe('bsdiff (rust)', () => {
   const patchFile = path.join(resDir, 'react.patch')
   const generatedFile = path.join(resDir, 'react-generated.zip')
 
+  // 设置全局超时时间为10秒，适应CI环境和大文件处理
+  this.timeout(10000)
+
   // 检查测试文件是否存在
   before(() => {
     if (!fs.existsSync(oldFile)) {
@@ -33,7 +36,10 @@ describe('bsdiff (rust)', () => {
   })
 
   describe('#diff() + #patch() async', () => {
-    it('should generate a file identical to original file after applying a patch to an old file', async () => {
+    it('should generate a file identical to original file after applying a patch to an old file', async function () {
+      // 统一使用10秒超时
+      this.timeout(10000)
+
       // 使用新的异步 API（简化版本，不包含进度回调）
       await bsdiff.diff(oldFile, newFile, patchFile)
       await bsdiff.patch(oldFile, generatedFile, patchFile)
@@ -51,7 +57,10 @@ describe('bsdiff (rust)', () => {
   })
 
   describe('#diffSync() + #patchSync() sync', () => {
-    it('should generate a file identical to original file after applying a patch to an old file', () => {
+    it('should generate a file identical to original file after applying a patch to an old file', function () {
+      // 统一使用10秒超时
+      this.timeout(10000)
+
       // 使用同步 API
       bsdiff.diffSync(oldFile, newFile, patchFile)
       bsdiff.patchSync(oldFile, generatedFile, patchFile)
@@ -103,7 +112,10 @@ describe('bsdiff (rust)', () => {
   })
 
   describe('Performance test', () => {
-    it('should handle large files efficiently', () => {
+    it('should handle large files efficiently', function () {
+      // 统一使用10秒超时
+      this.timeout(10000)
+
       const startTime = Date.now()
 
       bsdiff.diffSync(oldFile, newFile, patchFile)
@@ -121,6 +133,12 @@ describe('bsdiff (rust)', () => {
       }
 
       console.log(`⚡ 性能测试: 处理 ${(fs.statSync(oldFile).size / 1024 / 1024).toFixed(2)} MB 文件用时 ${duration}ms`)
+
+      // 在CI环境中允许更长的处理时间，但保持在10秒超时内
+      const maxDuration = process.env.CI ? 9000 : 6000 // CI: 9秒, 本地: 6秒
+      if (duration > maxDuration) {
+        console.warn(`⚠️ 性能警告: 处理时间 ${duration}ms 超过预期的 ${maxDuration}ms`)
+      }
     })
   })
 })

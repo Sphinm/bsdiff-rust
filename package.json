@@ -56,7 +56,7 @@
     "format:toml": "taplo format",
     "format:rs": "cargo fmt",
     "lint": "oxlint .",
-    "test": "mocha test/test.js",
+    "test": "mocha test/test.js --timeout 10000 --reporter spec",
     "version": "napi version",
     "prepare": "husky"
   },

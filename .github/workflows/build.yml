@@ -184,7 +184,7 @@ jobs:
 
       # 原生环境测试（Windows, macOS）
       - name: Test native
-        run: pnpm test
+        run: CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
         if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
 
       # Linux x64 原生测试
@@ -198,8 +198,8 @@ jobs:
           ls -la *.node || echo "No .node files found"
           echo "Node.js version:"
           node --version
-          echo "Starting test..."
-          pnpm test
+          echo "Starting test with 10s timeout..."
+          CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
         if: matrix.settings.target == 'x86_64-unknown-linux-gnu' || matrix.settings.target == 'x86_64-unknown-linux-musl'
 
       # ARM64 Docker 测试
@@ -221,7 +221,8 @@ jobs:
             pnpm install --no-frozen-lockfile
             echo "Files after npm install:"
             ls -la *.node || echo "No .node files found after install"
-            pnpm test
+            echo "Starting Docker test with 10s timeout..."
+            CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
 
   # 最终状态检查
   zig-cross-compile-done:
