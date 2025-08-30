@@ -1,6 +1,6 @@
 {
   "name": "bsdiff-rust",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -48,7 +48,7 @@
     "build": "napi build --platform --release",
     "build:arm64": "napi build --platform --target aarch64-apple-darwin --release",
     "build:debug": "napi build --platform",
-    "prepublishOnly": "napi artifacts",
+    "prepublishOnly": "napi prepublish -t npm",
     "format": "run-p format:prettier format:rs format:toml",
     "format:prettier": "prettier . -w",
     "format:toml": "taplo format",

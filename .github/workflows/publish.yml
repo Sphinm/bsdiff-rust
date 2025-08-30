@@ -112,40 +112,37 @@ jobs:
           echo "Created directories:"
           ls -la npm/
 
-      - name: Run napi artifacts
+      - name: Run napi prepublish
         run: |
-          # 使用 napi artifacts 准备平台包
-          echo "Running napi artifacts..."
+          echo "Running napi prepublish..."
           pnpm run prepublishOnly
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify npm packages
         run: |
-          echo "Checking generated npm packages:"
+          echo "Generated npm packages:"
           ls -la npm/
-          echo ""
-          echo "Contents of each platform:"
-          for dir in npm/*/; do
-            if [ -d "$dir" ]; then
-              echo "=== $(basename "$dir") ==="
-              ls -la "$dir"
-              echo ""
-            fi
-          done
+          echo "Platform packages with package.json:"
+          find npm/ -name "package.json" -exec dirname {} \; | xargs -I {} basename {}
 
       - name: Publish to npm
+        # TODO: 添加条件 if: ${{ github.event_name == 'release' }} 来只在 release 时发布
         run: |
-          # 发布主包和平台包
-          echo "Publishing packages..."
+          echo "Event: ${{ github.event_name }}"
 
-          # 如果是 release 事件，发布到 npm
-          if [ "${{ github.event_name }}" = "release" ]; then
-            echo "Publishing release to npm..."
-            pnpm publish --access public --no-git-checks
-          else
-            echo "Not a release event, skipping npm publish"
-            echo "Event: ${{ github.event_name }}"
-            # TODO: 测试发布
-            pnpm publish --access public --no-git-checks
-          fi
+          # 发布主包
+          echo "Publishing main package..."
+          pnpm publish --access public --no-git-checks
+
+          # 发布平台子包
+          echo "Publishing platform packages..."
+          for platform_dir in npm/*/; do
+            if [ -f "$platform_dir/package.json" ]; then
+              platform_name=$(basename "$platform_dir")
+              echo "Publishing: $platform_name"
+              (cd "$platform_dir" && npm publish --access public)
+            fi
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
