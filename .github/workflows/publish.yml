@@ -1,10 +1,9 @@
-name: Publish to npm
+name: Publish
 
 on:
   workflow_run:
     workflows: ['Zig-Cross-Compile']
     types: [completed]
-    # 构建完成后自动触发发布
   workflow_dispatch: # 允许手动触发发布
 
 jobs:
@@ -12,22 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
-    # 只在标签推送触发的构建成功时发布（build.yml 已限制只有 v* 标签触发）
+      id-token: write
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v') }}
+    # 只在版本标签触发的构建成功时发布
 
     steps:
-      - name: Extract tag name
-        id: extract_tag
-        run: |
-          # 从 workflow_run 中提取标签名称
-          TAG_NAME="${{ github.event.workflow_run.head_branch }}"
-          echo "Raw tag: $TAG_NAME"
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "release_name=Release $TAG_NAME" >> $GITHUB_OUTPUT
-
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -47,201 +36,56 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Download all build artifacts
-        uses: actions/github-script@v7
+        uses: actions/download-artifact@v4
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-
-            // 获取 workflow run 的 artifacts
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
-            });
-
-            console.log(`Found ${artifacts.data.artifacts.length} artifacts`);
-
-            // 下载每个 artifact
-            for (const artifact of artifacts.data.artifacts) {
-              console.log(`Downloading artifact: ${artifact.name}`);
-              
-              const download = await github.rest.actions.downloadArtifact({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                artifact_id: artifact.id,
-                archive_format: 'zip',
-              });
-              
-              // 创建 artifacts 目录
-              const artifactsDir = path.join(process.env.GITHUB_WORKSPACE, 'artifacts');
-              if (!fs.existsSync(artifactsDir)) {
-                fs.mkdirSync(artifactsDir, { recursive: true });
-              }
-              
-              // 保存并解压 artifact
-              const zipPath = path.join(artifactsDir, `${artifact.name}.zip`);
-              fs.writeFileSync(zipPath, Buffer.from(download.data));
-              
-              // 解压到平台命名的目录
-              const extractPath = path.join(artifactsDir, artifact.name);
-              if (!fs.existsSync(extractPath)) {
-                fs.mkdirSync(extractPath, { recursive: true });
-              }
-              
-              // 使用 unzip 命令解压
-              const { execSync } = require('child_process');
-              try {
-                execSync(`cd "${artifactsDir}" && unzip -o "${artifact.name}.zip" -d "${artifact.name}"`);
-                console.log(`Successfully extracted ${artifact.name}`);
-              } catch (error) {
-                console.error(`Failed to extract ${artifact.name}:`, error.message);
-              }
-            }
+          path: artifacts
+          merge-multiple: true
 
       - name: List downloaded artifacts
         run: |
           echo "Downloaded artifacts:"
-          ls -la artifacts/
-          echo ""
-          echo "Content of each artifact:"
-          for dir in artifacts/*/; do
-            if [ -d "$dir" ]; then
-              echo "=== $(basename "$dir") ==="
-              ls -la "$dir"
-              echo ""
-            fi
-          done
+          ls -la artifacts/ || echo "No artifacts found"
+          find artifacts/ -name "*.node" | head -10
 
-      - name: Create npm directories
+      - name: Move artifacts to workspace
         run: |
-          # 创建 npm 目录结构，因为 napi artifacts 需要这些目录存在
-          echo "Creating npm directory structure..."
-          mkdir -p npm/{darwin-arm64,darwin-x64,linux-x64-gnu,linux-x64-musl,linux-arm64-gnu,linux-arm64-musl}
-          echo "Created directories:"
-          ls -la npm/
+          # 将下载的 artifacts 移动到工作空间根目录，以便 napi 识别
+          find artifacts/ -name "*.node" -exec cp {} ./ \;
+          find artifacts/ -name "index.js" -exec cp {} ./ \; || true
+          find artifacts/ -name "index.d.ts" -exec cp {} ./ \; || true
+          echo "Moved artifacts:"
+          ls -la *.node || echo "No .node files found"
 
-      - name: Debug GitHub access
-        run: |
-          echo "=== GitHub Token 诊断 ==="
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Token available: ${GITHUB_TOKEN:+Yes}"
-          echo "Testing GitHub API access..."
-
-          # 测试基本API访问
-          if curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                  -H "Accept: application/vnd.github.v3+json" \
-                  "https://api.github.com/repos/$GITHUB_REPOSITORY" > /tmp/repo_info.json; then
-            echo "✅ API访问成功"
-            echo "仓库权限: $(jq -r '.permissions // "无权限信息"' /tmp/repo_info.json)"
-          else
-            echo "❌ API访问失败"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run napi prepublish
-        run: |
-          echo "Running napi prepublish..."
-          if ! pnpm run prepublishOnly; then
-            echo "❌ napi prepublish failed (GitHub release 404), using fallback..."
-            echo "Creating platform packages manually..."
-            pnpm exec napi artifacts
-            echo "✅ Fallback completed"
-          else
-            echo "✅ napi prepublish succeeded"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify npm packages
-        run: |
-          echo "Generated npm packages:"
-          ls -la npm/
-          echo "Platform packages with package.json:"
-          find npm/ -name "package.json" -exec dirname {} \; | xargs -I {} basename {}
-
-      - name: Collect .node files for release
-        id: collect_nodes
-        run: |
-          echo "=== Collecting all .node files for GitHub Release ==="
-          mkdir -p release_assets
-
-          # 先查看 artifacts 目录结构
-          echo "Artifacts directory structure:"
-          find artifacts/ -type f -name "*.node" || true
-
-          # 查找所有 .node 文件并复制到 release_assets 目录
-          node_files_found=0
-          for node_file in $(find artifacts/ -name "*.node" -type f); do
-            if [ -f "$node_file" ]; then
-              filename=$(basename "$node_file")
-              echo "📦 Found .node file: $filename"
-              cp "$node_file" "release_assets/$filename"
-              node_files_found=$((node_files_found + 1))
-            fi
-          done
-
-          echo ""
-          echo "=== Release Assets Summary ==="
-          echo "Total .node files collected: $node_files_found"
-          ls -la release_assets/ || echo "No files in release_assets/"
-
-          if [ "$node_files_found" -eq 0 ]; then
-            echo "⚠️  WARNING: No .node files found!"
-            echo "Available files in artifacts:"
-            find artifacts/ -type f | head -10
-          fi
-
-      - name: Create GitHub Release with .node files
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.event.workflow_run.head_branch, 'v')
         with:
-          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
-          name: ${{ steps.extract_tag.outputs.release_name }}
+          tag_name: ${{ github.event.workflow_run.head_branch }}
+          name: Release ${{ github.event.workflow_run.head_branch }}
           body: |
-            ## 🚀 bsdiff-rust ${{ steps.extract_tag.outputs.tag_name }}
+            ## 🚀 bsdiff-rust ${{ github.event.workflow_run.head_branch }}
 
             ### 📦 Native Binaries
-            This release includes precompiled native binaries for:
-            - **macOS**: `bsdiff-rust.darwin-arm64.node`, `bsdiff-rust.darwin-x64.node`
-            - **Linux**: `bsdiff-rust.linux-x64-gnu.node`, `bsdiff-rust.linux-x64-musl.node`, `bsdiff-rust.linux-arm64-gnu.node`, `bsdiff-rust.linux-arm64-musl.node`
+            Precompiled native binaries for multiple platforms.
 
             ### 📥 Installation
             ```bash
-            npm install bsdiff-rust@${{ steps.extract_tag.outputs.tag_name }}
+            npm install bsdiff-rust@${{ github.event.workflow_run.head_branch }}
             ```
-
-            ### 🎯 Direct Binary Download
-            You can download individual platform binaries from the assets below.
-
-            ### 🔗 Assets
-            - **Source code**: Available as zip and tar.gz
-            - **Native binaries**: Individual `.node` files for each platform
-
-            *Generated by automated CI/CD pipeline* 🤖
-          files: release_assets/*.node
+          files: '*.node'
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
-        # TODO: 添加条件 if: ${{ github.event_name == 'release' }} 来只在 release 时发布
         run: |
-          echo "Event: ${{ github.event_name }}"
-
           # 发布主包
-          echo "Publishing main package..."
           pnpm publish --access public --no-git-checks
 
           # 发布平台子包
-          echo "Publishing platform packages..."
-          for platform_dir in npm/*/; do
-            if [ -f "$platform_dir/package.json" ]; then
-              platform_name=$(basename "$platform_dir")
-              echo "Publishing: $platform_name"
-              (cd "$platform_dir" && npm publish --access public)
-            fi
+          for dir in npm/*/; do
+            [ -f "$dir/package.json" ] && (cd "$dir" && npm publish --access public --no-git-checks)
           done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
