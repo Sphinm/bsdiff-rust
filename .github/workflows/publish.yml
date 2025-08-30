@@ -144,6 +144,8 @@ jobs:
           else
             echo "Not a release event, skipping npm publish"
             echo "Event: ${{ github.event_name }}"
+            # TODO: 测试发布
+            pnpm publish --access public
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
