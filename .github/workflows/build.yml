@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    name: Zig-Cross-Compile-On-Linux
+    name: Zig
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -98,6 +98,14 @@ jobs:
         run: |
           pnpm exec napi build --target ${{ matrix.target }} --platform --release --cross-compile
 
+      - name: List and verify generated files
+        run: |
+          echo "Built files for target: ${{ matrix.target }}"
+          ls -la *.node || echo "No .node files found"
+          ls -la index.* || echo "No index files found"
+          echo "File details:"
+          find . -name "*.node" -exec file {} \;
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -153,20 +161,26 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-        if: matrix.settings.docker-platform == null
-
-      - name: Download artifacts
+      - name: Download artifacts first
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.settings.target }}
           path: ./
 
+      - name: Install dependencies (after downloading artifacts)
+        run: |
+          # Force clean install to avoid npm optional dependencies bug
+          rm -rf node_modules package-lock.json pnpm-lock.yaml || true
+          pnpm install --no-frozen-lockfile
+        if: matrix.settings.docker-platform == null
+
       - name: List files
         run: |
+          echo "Downloaded artifacts for target: ${{ matrix.settings.target }}"
           ls -la *.node || echo "No .node files found"
           ls -la index.* || echo "No index files found"
+          echo "Checking file contents..."
+          find . -name "*.node" -exec file {} \;
 
       # 原生环境测试（Windows, macOS）
       - name: Test native
@@ -175,7 +189,17 @@ jobs:
 
       # Linux x64 原生测试
       - name: Test Linux x64 native
-        run: pnpm test
+        run: |
+          echo "Testing Linux target: ${{ matrix.settings.target }}"
+          echo "Current environment:"
+          uname -a
+          ldd --version | head -1
+          echo "Available .node files:"
+          ls -la *.node || echo "No .node files found"
+          echo "Node.js version:"
+          node --version
+          echo "Starting test..."
+          pnpm test
         if: matrix.settings.target == 'x86_64-unknown-linux-gnu' || matrix.settings.target == 'x86_64-unknown-linux-musl'
 
       # ARM64 Docker 测试
@@ -189,8 +213,14 @@ jobs:
           image: node:22-alpine
           options: --platform linux/${{ matrix.settings.docker-platform }} -v ${{ github.workspace }}:/build -w /build
           run: |
-            apk add --no-cache pnpm
+            echo "Testing target: ${{ matrix.settings.target }} on platform: ${{ matrix.settings.docker-platform }}"
+            ls -la *.node || echo "No .node files found in workspace"
+            apk add --no-cache pnpm file
+            # Clean install to avoid npm optional dependencies issues
+            rm -rf node_modules package-lock.json pnpm-lock.yaml || true
             pnpm install --no-frozen-lockfile
+            echo "Files after npm install:"
+            ls -la *.node || echo "No .node files found after install"
             pnpm test
 
   # 最终状态检查
