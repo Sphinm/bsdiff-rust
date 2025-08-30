@@ -140,12 +140,12 @@ jobs:
           # 如果是 release 事件，发布到 npm
           if [ "${{ github.event_name }}" = "release" ]; then
             echo "Publishing release to npm..."
-            pnpm publish --access public
+            pnpm publish --access public --no-git-checks
           else
             echo "Not a release event, skipping npm publish"
             echo "Event: ${{ github.event_name }}"
             # TODO: 测试发布
-            pnpm publish --access public
+            pnpm publish --access public --no-git-checks
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
