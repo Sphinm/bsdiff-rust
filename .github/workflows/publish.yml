@@ -1,12 +1,11 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
   workflow_run:
     workflows: ['Zig-Cross-Compile']
     types: [completed]
-    branches: [main, master]
+    # 构建完成后自动触发发布
+  workflow_dispatch: # 允许手动触发发布
 
 jobs:
   publish:
@@ -14,7 +13,8 @@ jobs:
     permissions:
       contents: write
       packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    # 只在标签推送触发的构建成功时发布（build.yml 已限制只有 v* 标签触发）
 
     steps:
       - name: Checkout code
