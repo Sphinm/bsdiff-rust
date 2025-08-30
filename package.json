@@ -48,7 +48,7 @@
     "build": "napi build --platform --release",
     "build:arm64": "napi build --platform --target aarch64-apple-darwin --release",
     "build:debug": "napi build --platform",
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "napi artifacts",
     "format": "run-p format:prettier format:rs format:toml",
     "format:prettier": "prettier . -w",
     "format:toml": "taplo format",

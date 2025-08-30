@@ -7,6 +7,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read # 允许读取仓库内容
+  actions: write # 允许上传 artifacts
+
 on:
   push:
     branches: [main, master]
