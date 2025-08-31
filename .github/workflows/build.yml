@@ -231,6 +231,7 @@ jobs:
 
   # 发布到 GitHub 和 npm
   publish:
+    name: Zig Cross Compiled Publish to NPM
     runs-on: ubuntu-latest
     needs:
       - test
@@ -255,27 +256,22 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
-          merge-multiple: true
 
-      - name: Debug downloaded artifacts
+      - name: create npm dirs
+        run: pnpm exec napi create-npm-dir
+
+      - name: List downloaded artifacts
         run: |
-          echo "=== Debugging downloaded artifacts ==="
+          echo "=== downloaded artifacts ==="
           ls -la artifacts/ || echo "No artifacts directory"
-
-      - name: Prepare npm packages (skip GitHub Release)
-        run: |
-          echo "Preparing npm packages..."
-          # 不设置 GITHUB_TOKEN, 这样 napi prepublish 无法创建 GitHub Release
-          # pnpm exec napi prepublish -t npm
-
-          # echo "Generated npm structure:"
-          # ls -la npm/ || echo "No npm directory found"
+          echo "=== npm dirs ==="
+          ls -R ./npm
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -317,8 +313,6 @@ jobs:
           # done
           echo "Publishing npm publish..."
           pnpm publish --access public --no-git-checks
-          echo "Generated npm structure:"
-          ls -la npm/ || echo "No npm directory found"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
