@@ -258,11 +258,34 @@ jobs:
         with:
           path: artifacts
 
+      - name: Prepare artifacts for npm structure
+        run: |
+          echo "=== Downloaded artifacts structure ==="
+          ls -la artifacts/ || echo "No artifacts directory"
+
+          # 将每个平台的 artifacts 复制到正确位置
+          for target_dir in artifacts/*/; do
+            if [ -d "$target_dir" ]; then
+              target_name=$(basename "$target_dir")
+              echo "Processing target: $target_name"
+              ls -la "$target_dir"
+              
+              # 复制 .node 文件到项目根目录
+              cp "$target_dir"/*.node . || echo "No .node files in $target_dir"
+            fi
+          done
+
+          echo "=== Current directory after copying ==="
+          ls -la *.node || echo "No .node files found"
+
       - name: Create npm package structure
         id: create-npm-dirs
         run: |
           pnpm exec napi prepublish -t npm
           echo "dirs=$(ls -1 npm/ | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+
+          echo "=== Created npm structure ==="
+          ls -R npm/ || echo "No npm directory created"
 
       - name: Upload npm packages as artifacts
         uses: actions/upload-artifact@v4
@@ -287,6 +310,14 @@ jobs:
         with:
           name: npm-packages
           path: npm/
+
+      - name: List files for release
+        run: |
+          echo "=== Files in npm directory ==="
+          find npm/ -name "*.node" -type f || echo "No .node files found in npm directory"
+
+          echo "=== All files in npm directory ==="
+          find npm/ -type f || echo "No files found in npm directory"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -347,6 +378,17 @@ jobs:
         with:
           name: npm-packages
           path: npm/
+
+      - name: Verify npm packages for publishing
+        run: |
+          echo "=== Downloaded npm packages structure ==="
+          ls -la npm/ || echo "No npm directory found"
+
+          echo "=== Contents of npm directory ==="
+          find npm/ -type f || echo "No files found in npm directory"
+
+          echo "=== Package.json files ==="
+          find npm/ -name "package.json" -exec cat {} \; || echo "No package.json files found"
 
       - name: Publish main package
         run: pnpm publish --access public --no-git-checks
