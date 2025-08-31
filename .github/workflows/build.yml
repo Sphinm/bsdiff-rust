@@ -264,7 +264,7 @@ jobs:
           path: artifacts
 
       - name: create npm dirs
-        run: pnpm exec napi create-npm-dir
+        run: pnpm exec napi create-npm-dirs
 
       - name: List downloaded artifacts
         run: |
