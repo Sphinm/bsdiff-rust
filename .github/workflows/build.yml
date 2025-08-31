@@ -315,7 +315,9 @@ jobs:
           #     echo "Skipping $(basename $dir) - no package.json found"
           #   fi
           # done
+          echo "Publishing npm install..."
           npm install -g npm
+          echo "Publishing npm publish..."
           npm publish --access public
           echo "Generated npm structure:"
           ls -la npm/ || echo "No npm directory found"
