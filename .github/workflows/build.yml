@@ -282,7 +282,7 @@ jobs:
           echo "Publishing platform packages..."
           for dir in npm/*/; do
             if [ -f "$dir/package.json" ]; then
-              echo "Publishing $(basename $dir)..."
+              echo "Publishing sub package $(basename $dir)..."
               (cd "$dir" && npm publish --access public --no-git-checks)
             else
               echo "Skipping $(basename $dir) - no package.json found"

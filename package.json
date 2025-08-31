@@ -1,10 +1,13 @@
 {
   "name": "bsdiff-rust",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
-  "repository": "git@github.com/Sphinm/bsdiff-rust.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/Sphinm/bsdiff-rust.git"
+  },
   "author": "min.su <sumin1500160640@gmail.com>",
   "license": "MIT",
   "keywords": [
