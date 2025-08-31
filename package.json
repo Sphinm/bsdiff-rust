@@ -1,6 +1,6 @@
 {
   "name": "bsdiff-rust",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
