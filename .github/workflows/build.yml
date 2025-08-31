@@ -275,7 +275,7 @@ jobs:
         run: |
           # 发布主包
           echo "Publishing main package..."
-          pnpm publish --access public
+          pnpm publish --access public --no-git-checks
 
           # # 发布平台子包
           # echo "Publishing platform packages..."
