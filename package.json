@@ -1,6 +1,6 @@
 {
-  "name": "@bsdiff-rust/node",
-  "version": "0.0.1",
+  "name": "@rust-cross-platform/bsdiff",
+  "version": "0.0.2",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -29,7 +29,7 @@
     "index.js"
   ],
   "napi": {
-    "binaryName": "node",
+    "binaryName": "bsdiff",
     "targets": [
       "aarch64-apple-darwin",
       "x86_64-apple-darwin",
