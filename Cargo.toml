@@ -3,7 +3,7 @@
 authors     = ["min.su <sumin1500160640@gmail.com>"]
 description = "A Rust implementation of bsdiff and bspatch"
 edition     = "2021"
-name        = "bsdiff_rust"
+name        = "node"
 version     = "0.1.0"
 
 [lib]

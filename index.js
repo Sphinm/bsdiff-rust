@@ -73,7 +73,7 @@ function requireNative() {
   } else if (process.platform === 'android') {
     if (process.arch === 'arm64') {
       try {
-        return require('./bsdiff-rust.android-arm64.node')
+        return require('./node.android-arm64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -89,7 +89,7 @@ function requireNative() {
       }
     } else if (process.arch === 'arm') {
       try {
-        return require('./bsdiff-rust.android-arm-eabi.node')
+        return require('./node.android-arm-eabi.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -109,7 +109,7 @@ function requireNative() {
   } else if (process.platform === 'win32') {
     if (process.arch === 'x64') {
       try {
-        return require('./bsdiff-rust.win32-x64-msvc.node')
+        return require('./node.win32-x64-msvc.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -125,7 +125,7 @@ function requireNative() {
       }
     } else if (process.arch === 'ia32') {
       try {
-        return require('./bsdiff-rust.win32-ia32-msvc.node')
+        return require('./node.win32-ia32-msvc.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -141,7 +141,7 @@ function requireNative() {
       }
     } else if (process.arch === 'arm64') {
       try {
-        return require('./bsdiff-rust.win32-arm64-msvc.node')
+        return require('./node.win32-arm64-msvc.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -160,7 +160,7 @@ function requireNative() {
     }
   } else if (process.platform === 'darwin') {
     try {
-      return require('./bsdiff-rust.darwin-universal.node')
+      return require('./node.darwin-universal.node')
     } catch (e) {
       loadErrors.push(e)
     }
@@ -176,7 +176,7 @@ function requireNative() {
     }
     if (process.arch === 'x64') {
       try {
-        return require('./bsdiff-rust.darwin-x64.node')
+        return require('./node.darwin-x64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -192,7 +192,7 @@ function requireNative() {
       }
     } else if (process.arch === 'arm64') {
       try {
-        return require('./bsdiff-rust.darwin-arm64.node')
+        return require('./node.darwin-arm64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -212,7 +212,7 @@ function requireNative() {
   } else if (process.platform === 'freebsd') {
     if (process.arch === 'x64') {
       try {
-        return require('./bsdiff-rust.freebsd-x64.node')
+        return require('./node.freebsd-x64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -228,7 +228,7 @@ function requireNative() {
       }
     } else if (process.arch === 'arm64') {
       try {
-        return require('./bsdiff-rust.freebsd-arm64.node')
+        return require('./node.freebsd-arm64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -249,7 +249,7 @@ function requireNative() {
     if (process.arch === 'x64') {
       if (isMusl()) {
         try {
-          return require('./bsdiff-rust.linux-x64-musl.node')
+          return require('./node.linux-x64-musl.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -265,7 +265,7 @@ function requireNative() {
         }
       } else {
         try {
-          return require('./bsdiff-rust.linux-x64-gnu.node')
+          return require('./node.linux-x64-gnu.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -283,7 +283,7 @@ function requireNative() {
     } else if (process.arch === 'arm64') {
       if (isMusl()) {
         try {
-          return require('./bsdiff-rust.linux-arm64-musl.node')
+          return require('./node.linux-arm64-musl.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -299,7 +299,7 @@ function requireNative() {
         }
       } else {
         try {
-          return require('./bsdiff-rust.linux-arm64-gnu.node')
+          return require('./node.linux-arm64-gnu.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -317,7 +317,7 @@ function requireNative() {
     } else if (process.arch === 'arm') {
       if (isMusl()) {
         try {
-          return require('./bsdiff-rust.linux-arm-musleabihf.node')
+          return require('./node.linux-arm-musleabihf.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -333,7 +333,7 @@ function requireNative() {
         }
       } else {
         try {
-          return require('./bsdiff-rust.linux-arm-gnueabihf.node')
+          return require('./node.linux-arm-gnueabihf.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -351,7 +351,7 @@ function requireNative() {
     } else if (process.arch === 'riscv64') {
       if (isMusl()) {
         try {
-          return require('./bsdiff-rust.linux-riscv64-musl.node')
+          return require('./node.linux-riscv64-musl.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -367,7 +367,7 @@ function requireNative() {
         }
       } else {
         try {
-          return require('./bsdiff-rust.linux-riscv64-gnu.node')
+          return require('./node.linux-riscv64-gnu.node')
         } catch (e) {
           loadErrors.push(e)
         }
@@ -384,7 +384,7 @@ function requireNative() {
       }
     } else if (process.arch === 'ppc64') {
       try {
-        return require('./bsdiff-rust.linux-ppc64-gnu.node')
+        return require('./node.linux-ppc64-gnu.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -400,7 +400,7 @@ function requireNative() {
       }
     } else if (process.arch === 's390x') {
       try {
-        return require('./bsdiff-rust.linux-s390x-gnu.node')
+        return require('./node.linux-s390x-gnu.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -420,7 +420,7 @@ function requireNative() {
   } else if (process.platform === 'openharmony') {
     if (process.arch === 'arm64') {
       try {
-        return require('./bsdiff-rust.openharmony-arm64.node')
+        return require('./node.openharmony-arm64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -436,7 +436,7 @@ function requireNative() {
       }
     } else if (process.arch === 'x64') {
       try {
-        return require('./bsdiff-rust.openharmony-x64.node')
+        return require('./node.openharmony-x64.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -452,7 +452,7 @@ function requireNative() {
       }
     } else if (process.arch === 'arm') {
       try {
-        return require('./bsdiff-rust.openharmony-arm.node')
+        return require('./node.openharmony-arm.node')
       } catch (e) {
         loadErrors.push(e)
       }
@@ -478,7 +478,7 @@ nativeBinding = requireNative()
 
 if (!nativeBinding || process.env.NAPI_RS_FORCE_WASI) {
   try {
-    nativeBinding = require('./bsdiff-rust.wasi.cjs')
+    nativeBinding = require('./node.wasi.cjs')
   } catch (err) {
     if (process.env.NAPI_RS_FORCE_WASI) {
       loadErrors.push(err)

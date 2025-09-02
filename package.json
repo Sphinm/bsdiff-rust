@@ -29,7 +29,7 @@
     "index.js"
   ],
   "napi": {
-    "binaryName": "bsdiff-rust",
+    "binaryName": "node",
     "targets": [
       "aarch64-apple-darwin",
       "x86_64-apple-darwin",
