@@ -7,10 +7,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write # GitHub Release 需要
-  actions: write # artifacts 需要
-
 on:
   push:
     branches: [master]
@@ -229,6 +225,9 @@ jobs:
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     needs:
       - test
     # if: ${{ needs.test.result == 'success' && startsWith(github.ref, 'refs/tags/v') }}
