@@ -118,4 +118,5 @@ Cargo.lock
 *.node
 .pnp.*
 /npm
+/artifacts
 .DS_Store
