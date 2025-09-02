@@ -262,7 +262,7 @@ jobs:
       - name: create npm dirs
         run: pnpm exec napi create-npm-dirs
 
-      - name: Move artifacts
+      - name: List packages and create artifacts
         run: |
           echo "=== Moving artifacts ==="
           pnpm artifacts
@@ -275,19 +275,6 @@ jobs:
         run: |
           # 发布主包
           echo "Publishing main package..."
-          npm install -g npm
-          npm publish --access public --no-git-checks
-
-          # # 发布平台子包
-          # echo "Publishing platform packages..."
-          # for dir in npm/*/; do
-          #   if [ -f "$dir/package.json" ]; then
-          #     echo "Publishing sub package $(basename $dir)..."
-          #     (cd "$dir" && pnpm publish --access public --no-git-checks)
-          #   else
-          #     echo "Skipping $(basename $dir) - no package.json found"
-          #   fi
-          # done
+          pnpm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

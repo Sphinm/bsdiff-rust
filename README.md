@@ -12,6 +12,9 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 - 📦 **二进制补丁**: 生成和应用二进制文件补丁
 - 🗜️ **压缩支持**: 使用 bzip2 压缩补丁文件
 - 🔄 **异步支持**: 提供同步和异步 API
+- ✅ **完整性验证**: 补丁文件完整性验证
+- 📊 **压缩比分析**: 详细的压缩比和文件大小信息
+- 🔍 **文件检查**: 文件存在性和访问权限验证
 - 🎯 **跨平台**: 支持 Windows、macOS、Linux
 - 📱 **Node.js 绑定**: 完整的 JavaScript/TypeScript 支持
 
@@ -37,6 +40,14 @@ bsdiff.patchSync('old-file.zip', 'generated-file.zip', 'patch.bin')
 // 异步 API
 await bsdiff.diff('old-file.zip', 'new-file.zip', 'patch.bin')
 await bsdiff.patch('old-file.zip', 'generated-file.zip', 'patch.bin')
+
+// 高级功能
+const isValid = bsdiff.verifyPatchSync('old-file.zip', 'new-file.zip', 'patch.bin')
+const info = bsdiff.getPatchInfoSync('patch.bin')
+const ratio = bsdiff.getCompressionRatioSync('old-file.zip', 'new-file.zip', 'patch.bin')
+
+console.log(`补丁大小: ${(info.size / 1024).toFixed(2)} KB`)
+console.log(`压缩比: ${ratio.ratio.toFixed(2)}%`)
 ```
 
 ### TypeScript 支持
@@ -86,6 +97,60 @@ patch(oldFile: string, newFile: string, patchFile: string): Promise<void>
 ```
 
 异步应用补丁。
+
+```js
+verifyPatch(oldFile: string, newFile: string, patchFile: string): Promise<boolean>
+```
+
+异步验证补丁完整性。
+
+### 高级功能 API
+
+```js
+verifyPatchSync(oldFile: string, newFile: string, patchFile: string): boolean
+```
+
+同步验证补丁完整性。
+
+```js
+getPatchInfoSync(patchFile: string): PatchInfo
+```
+
+获取补丁文件信息。
+
+```js
+getFileSizeSync(filePath: string): number
+```
+
+获取文件大小（字节）。
+
+```js
+checkFileAccessSync(filePath: string): void
+```
+
+检查文件是否存在且可读。
+
+```js
+getCompressionRatioSync(oldFile: string, newFile: string, patchFile: string): CompressionRatio
+```
+
+计算压缩比信息。
+
+### 数据结构
+
+```typescript
+interface PatchInfo {
+  size: number // 补丁文件大小（字节）
+  compressed: boolean // 是否压缩
+}
+
+interface CompressionRatio {
+  oldSize: number // 旧文件大小（字节）
+  newSize: number // 新文件大小（字节）
+  patchSize: number // 补丁文件大小（字节）
+  ratio: number // 压缩比（百分比）
+}
+```
 
 ## 🧪 测试
 

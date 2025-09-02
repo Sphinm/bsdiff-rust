@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read, Write, BufReader, BufWriter};
 use bzip2::read::BzDecoder;
 use bzip2::write::BzEncoder;
 use bzip2::Compression;
@@ -9,19 +9,28 @@ pub struct BsdiffRust;
 impl BsdiffRust {
     /// 生成 bsdiff 补丁文件
     pub fn diff(old_file: &str, new_file: &str, patch_file: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // 读取旧文件
+        // 验证输入文件
+        if !std::path::Path::new(old_file).exists() {
+            return Err(format!("Old file not found: {}", old_file).into());
+        }
+        if !std::path::Path::new(new_file).exists() {
+            return Err(format!("New file not found: {}", new_file).into());
+        }
+
+        // 使用缓冲读取提高效率
         let mut old_data = Vec::new();
-        File::open(old_file)?.read_to_end(&mut old_data)?;
+        let mut reader = BufReader::new(File::open(old_file)?);
+        reader.read_to_end(&mut old_data)?;
         
-        // 读取新文件
         let mut new_data = Vec::new();
-        File::open(new_file)?.read_to_end(&mut new_data)?;
+        let mut reader = BufReader::new(File::open(new_file)?);
+        reader.read_to_end(&mut new_data)?;
         
-        // 创建补丁文件
+        // 使用缓冲写入提高效率
         let patch_file = File::create(patch_file)?;
-        let mut writer = BzEncoder::new(patch_file, Compression::best());
+        let mut writer = BzEncoder::new(BufWriter::new(patch_file), Compression::best());
         
-        // 生成补丁 - 使用 bsdiff 库的简单 API
+        // 生成补丁
         bsdiff::diff(&old_data, &new_data, &mut writer)?;
         
         Ok(())
@@ -29,26 +38,33 @@ impl BsdiffRust {
     
     /// 应用 bsdiff 补丁文件
     pub fn patch(old_file: &str, new_file: &str, patch_file: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // 读取旧文件
+        // 验证输入文件
+        if !std::path::Path::new(old_file).exists() {
+            return Err(format!("Old file not found: {}", old_file).into());
+        }
+        if !std::path::Path::new(patch_file).exists() {
+            return Err(format!("Patch file not found: {}", patch_file).into());
+        }
+
+        // 使用缓冲读取提高效率
         let mut old_data = Vec::new();
-        File::open(old_file)?.read_to_end(&mut old_data)?;
+        let mut reader = BufReader::new(File::open(old_file)?);
+        reader.read_to_end(&mut old_data)?;
         
         // 读取补丁文件
         let patch_file = File::open(patch_file)?;
         let mut reader = BzDecoder::new(patch_file);
         
-        // 应用补丁 - 使用 bsdiff 库的简单 API
+        // 应用补丁
         let mut new_data = Vec::new();
         bsdiff::patch(&old_data, &mut reader, &mut new_data)?;
         
-        // 写入新文件
-        let mut new_file = File::create(new_file)?;
+        // 使用缓冲写入提高效率
+        let mut new_file = BufWriter::new(File::create(new_file)?);
         new_file.write_all(&new_data)?;
         
         Ok(())
     }
-    
-
 }
 
 #[cfg(test)]

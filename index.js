@@ -78,10 +78,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-android-arm64')
-        const bindingPackageVersion = require('bsdiff-rust-android-arm64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-android-arm64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-android-arm64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -94,10 +94,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-android-arm-eabi')
-        const bindingPackageVersion = require('bsdiff-rust-android-arm-eabi/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-android-arm-eabi')
+        const bindingPackageVersion = require('@bsdiff-rust/node-android-arm-eabi/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -114,10 +114,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-win32-x64-msvc')
-        const bindingPackageVersion = require('bsdiff-rust-win32-x64-msvc/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-win32-x64-msvc')
+        const bindingPackageVersion = require('@bsdiff-rust/node-win32-x64-msvc/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -130,10 +130,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-win32-ia32-msvc')
-        const bindingPackageVersion = require('bsdiff-rust-win32-ia32-msvc/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-win32-ia32-msvc')
+        const bindingPackageVersion = require('@bsdiff-rust/node-win32-ia32-msvc/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -146,10 +146,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-win32-arm64-msvc')
-        const bindingPackageVersion = require('bsdiff-rust-win32-arm64-msvc/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-win32-arm64-msvc')
+        const bindingPackageVersion = require('@bsdiff-rust/node-win32-arm64-msvc/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -165,10 +165,10 @@ function requireNative() {
       loadErrors.push(e)
     }
     try {
-      const binding = require('bsdiff-rust-darwin-universal')
-      const bindingPackageVersion = require('bsdiff-rust-darwin-universal/package.json').version
-      if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-        throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+      const binding = require('@bsdiff-rust/node-darwin-universal')
+      const bindingPackageVersion = require('@bsdiff-rust/node-darwin-universal/package.json').version
+      if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+        throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
       }
       return binding
     } catch (e) {
@@ -181,10 +181,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-darwin-x64')
-        const bindingPackageVersion = require('bsdiff-rust-darwin-x64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-darwin-x64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-darwin-x64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -197,10 +197,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-darwin-arm64')
-        const bindingPackageVersion = require('bsdiff-rust-darwin-arm64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-darwin-arm64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-darwin-arm64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -217,10 +217,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-freebsd-x64')
-        const bindingPackageVersion = require('bsdiff-rust-freebsd-x64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-freebsd-x64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-freebsd-x64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -233,10 +233,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-freebsd-arm64')
-        const bindingPackageVersion = require('bsdiff-rust-freebsd-arm64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-freebsd-arm64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-freebsd-arm64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -254,10 +254,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-x64-musl')
-          const bindingPackageVersion = require('bsdiff-rust-linux-x64-musl/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-x64-musl')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-x64-musl/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -270,10 +270,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-x64-gnu')
-          const bindingPackageVersion = require('bsdiff-rust-linux-x64-gnu/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-x64-gnu')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-x64-gnu/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -288,10 +288,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-arm64-musl')
-          const bindingPackageVersion = require('bsdiff-rust-linux-arm64-musl/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-arm64-musl')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-arm64-musl/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -304,10 +304,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-arm64-gnu')
-          const bindingPackageVersion = require('bsdiff-rust-linux-arm64-gnu/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-arm64-gnu')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-arm64-gnu/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -322,10 +322,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-arm-musleabihf')
-          const bindingPackageVersion = require('bsdiff-rust-linux-arm-musleabihf/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-arm-musleabihf')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-arm-musleabihf/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -338,10 +338,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-arm-gnueabihf')
-          const bindingPackageVersion = require('bsdiff-rust-linux-arm-gnueabihf/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-arm-gnueabihf')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-arm-gnueabihf/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -356,10 +356,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-riscv64-musl')
-          const bindingPackageVersion = require('bsdiff-rust-linux-riscv64-musl/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-riscv64-musl')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-riscv64-musl/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -372,10 +372,10 @@ function requireNative() {
           loadErrors.push(e)
         }
         try {
-          const binding = require('bsdiff-rust-linux-riscv64-gnu')
-          const bindingPackageVersion = require('bsdiff-rust-linux-riscv64-gnu/package.json').version
-          if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-            throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+          const binding = require('@bsdiff-rust/node-linux-riscv64-gnu')
+          const bindingPackageVersion = require('@bsdiff-rust/node-linux-riscv64-gnu/package.json').version
+          if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+            throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
           }
           return binding
         } catch (e) {
@@ -389,10 +389,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-linux-ppc64-gnu')
-        const bindingPackageVersion = require('bsdiff-rust-linux-ppc64-gnu/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-linux-ppc64-gnu')
+        const bindingPackageVersion = require('@bsdiff-rust/node-linux-ppc64-gnu/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -405,10 +405,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-linux-s390x-gnu')
-        const bindingPackageVersion = require('bsdiff-rust-linux-s390x-gnu/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-linux-s390x-gnu')
+        const bindingPackageVersion = require('@bsdiff-rust/node-linux-s390x-gnu/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -425,10 +425,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-openharmony-arm64')
-        const bindingPackageVersion = require('bsdiff-rust-openharmony-arm64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-openharmony-arm64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-openharmony-arm64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -441,10 +441,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-openharmony-x64')
-        const bindingPackageVersion = require('bsdiff-rust-openharmony-x64/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-openharmony-x64')
+        const bindingPackageVersion = require('@bsdiff-rust/node-openharmony-x64/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -457,10 +457,10 @@ function requireNative() {
         loadErrors.push(e)
       }
       try {
-        const binding = require('bsdiff-rust-openharmony-arm')
-        const bindingPackageVersion = require('bsdiff-rust-openharmony-arm/package.json').version
-        if (bindingPackageVersion !== '1.0.3' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
-          throw new Error(`Native binding package version mismatch, expected 1.0.3 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
+        const binding = require('@bsdiff-rust/node-openharmony-arm')
+        const bindingPackageVersion = require('@bsdiff-rust/node-openharmony-arm/package.json').version
+        if (bindingPackageVersion !== '0.0.1' && process.env.NAPI_RS_ENFORCE_VERSION_CHECK && process.env.NAPI_RS_ENFORCE_VERSION_CHECK !== '0') {
+          throw new Error(`Native binding package version mismatch, expected 0.0.1 but got ${bindingPackageVersion}. You can reinstall dependencies to fix this issue.`)
         }
         return binding
       } catch (e) {
@@ -486,7 +486,7 @@ if (!nativeBinding || process.env.NAPI_RS_FORCE_WASI) {
   }
   if (!nativeBinding) {
     try {
-      nativeBinding = require('bsdiff-rust-wasm32-wasi')
+      nativeBinding = require('@bsdiff-rust/node-wasm32-wasi')
     } catch (err) {
       if (process.env.NAPI_RS_FORCE_WASI) {
         loadErrors.push(err)
@@ -508,7 +508,13 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.checkFileAccessSync = nativeBinding.checkFileAccessSync
 module.exports.diff = nativeBinding.diff
 module.exports.diffSync = nativeBinding.diffSync
+module.exports.getCompressionRatioSync = nativeBinding.getCompressionRatioSync
+module.exports.getFileSizeSync = nativeBinding.getFileSizeSync
+module.exports.getPatchInfoSync = nativeBinding.getPatchInfoSync
 module.exports.patch = nativeBinding.patch
 module.exports.patchSync = nativeBinding.patchSync
+module.exports.verifyPatch = nativeBinding.verifyPatch
+module.exports.verifyPatchSync = nativeBinding.verifyPatchSync
