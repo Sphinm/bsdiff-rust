@@ -273,8 +273,8 @@ jobs:
 
       - name: Publish to npm
         run: |
-          # 发布主包
+          # 发布 npm 包
           echo "Publishing main package..."
-          pnpm publish --access public
+          pnpm publish --access public --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
