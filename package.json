@@ -1,6 +1,6 @@
 {
   "name": "@bsdiff-rust/node",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -36,7 +36,9 @@
       "x86_64-unknown-linux-musl",
       "aarch64-unknown-linux-musl",
       "x86_64-unknown-linux-gnu",
-      "aarch64-unknown-linux-gnu"
+      "aarch64-unknown-linux-gnu",
+      "x86_64-pc-windows-msvc",
+      "aarch64-pc-windows-msvc"
     ]
   },
   "engines": {
