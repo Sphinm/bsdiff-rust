@@ -10,7 +10,7 @@ A high-performance Rust implementation of the bsdiff and bspatch algorithms with
 - 🔥 **高性能**: 使用 Rust 实现，性能优异
 - 🛡️ **内存安全**: Rust 保证内存安全和线程安全
 - 📦 **二进制补丁**: 生成和应用二进制文件补丁
-- 🗜️ **压缩支持**: 使用 bzip2 压缩补丁文件
+- 🗜️ **压缩支持**: 使用 zstd 压缩补丁文件
 - 🔄 **异步支持**: 提供同步和异步 API
 - ✅ **完整性验证**: 补丁文件完整性验证
 - 📊 **压缩比分析**: 详细的压缩比和文件大小信息
@@ -214,7 +214,7 @@ pnpm lint
 ### 后端 (Rust)
 
 - **bsdiff = "0.2.1"**: 成熟的 bsdiff 算法库
-- **bzip2 = "0.4"**: 压缩库
+- **zstd = "0.13"**: 压缩库
 - **NAPI-RS**: Node.js 绑定框架
 
 ### 前端 (Node.js)

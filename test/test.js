@@ -5,8 +5,8 @@ const bsdiff = require('../index')
 
 describe('bsdiff (rust)', function () {
   const resDir = path.join(__dirname, 'resources')
-  const oldFile = path.join(resDir, 'react-0.3-stable.zip')
-  const newFile = path.join(resDir, 'react-0.4-stable.zip')
+  const oldFile = path.join(resDir, 'v4.17.48.zip')
+  const newFile = path.join(resDir, 'v4.17.50.zip')
   const patchFile = path.join(resDir, 'react.patch')
   const generatedFile = path.join(resDir, 'react-generated.zip')
 

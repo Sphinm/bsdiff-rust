@@ -185,4 +185,4 @@ pub fn verify_patch(
   patch: String,
 ) -> Result<AsyncTask<VerifyPatchTask>> {
   Ok(AsyncTask::new(VerifyPatchTask { old_str, new_str, patch }))
-} 
+}

@@ -20,7 +20,7 @@
     "NAPI",
     "N-API",
     "compression",
-    "bzip2",
+    "zstd",
     "node-addon",
     "node-addon-api"
   ],
@@ -36,9 +36,7 @@
       "x86_64-unknown-linux-musl",
       "aarch64-unknown-linux-musl",
       "x86_64-unknown-linux-gnu",
-      "aarch64-unknown-linux-gnu",
-      "x86_64-pc-windows-msvc",
-      "aarch64-pc-windows-msvc"
+      "aarch64-unknown-linux-gnu"
     ]
   },
   "engines": {
@@ -68,6 +66,7 @@
     "@napi-rs/cli": "^3.0.3",
     "@oxc-node/core": "^0.0.32",
     "@taplo/cli": "^0.7.0",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^24.3.0",
     "chalk": "^5.4.1",
     "husky": "^9.1.7",
@@ -77,6 +76,7 @@
     "oxlint": "^1.8.0",
     "prettier": "^3.6.2",
     "tinybench": "^5.0.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   },
   "lint-staged": {

@@ -31,8 +31,8 @@ jobs:
             'aarch64-unknown-linux-musl',
             'x86_64-unknown-linux-gnu',
             'aarch64-unknown-linux-gnu',
-            'x86_64-pc-windows-msvc',
-            'aarch64-pc-windows-msvc',
+            # 'x86_64-pc-windows-msvc',
+            # 'aarch64-pc-windows-msvc',
           ]
 
     steps:
@@ -89,11 +89,11 @@ jobs:
           curl -L "https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz" | sudo tar -J -x -C /opt
           ls -la /opt/ | grep -i macos || echo "SDK extraction may have failed"
 
-      - name: install Windows msvc tools
-        if: contains(matrix.target, 'windows')
-        run: |
-          sudo apt update
-          sudo apt install -y lld llvm
+      # - name: install Windows msvc tools
+      #   if: contains(matrix.target, 'windows')
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install -y lld llvm
 
       - name: Cross build native addon
         env:
@@ -143,10 +143,10 @@ jobs:
           - host: ubuntu-latest
             target: aarch64-unknown-linux-musl
             docker-platform: arm64
-          - host: windows-latest
-            target: x86_64-pc-windows-msvc
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
+          # - host: windows-latest
+          #   target: x86_64-pc-windows-msvc
+          # - host: windows-latest
+          #   target: aarch64-pc-windows-msvc
 
     steps:
       - uses: actions/checkout@v4
@@ -183,9 +183,9 @@ jobs:
           find . -name "*.node" -exec file {} \;
 
       # 原生环境测试（Windows, macOS）
-      - name: Test native
-        run: CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
-        if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
+      # - name: Test native
+      #   run: CI=true pnpm exec mocha test/test.js --timeout 10000 --reporter spec
+      #   if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
 
       # Linux x64 原生测试
       - name: List Linux x64 files only

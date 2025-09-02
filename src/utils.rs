@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Read, BufReader};
-use bzip2::read::BzDecoder;
+use zstd::stream::Decoder as ZstdDecoder;
 
 /// 补丁文件信息
 #[derive(Debug, Clone)]
@@ -31,7 +31,7 @@ pub fn verify_patch(old_file: &str, new_file: &str, patch_file: &str) -> Result<
     
     // 应用补丁到临时数据
     let patch_file = File::open(patch_file)?;
-    let mut reader = BzDecoder::new(patch_file);
+    let mut reader = ZstdDecoder::new(patch_file)?;
     let mut patched_data = Vec::new();
     
     bsdiff::patch(&old_data, &mut reader, &mut patched_data)?;
@@ -45,7 +45,7 @@ pub fn get_patch_info(patch_file: &str) -> Result<PatchInfo, Box<dyn std::error:
     let metadata = std::fs::metadata(patch_file)?;
     Ok(PatchInfo {
         size: metadata.len(),
-        compressed: true, // 我们总是使用 bzip2 压缩
+        compressed: true, // 我们总是使用 zstd 压缩
     })
 }
 
