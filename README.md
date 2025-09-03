@@ -5,6 +5,8 @@ A high-performance Rust implementation of bsdiff and bspatch algorithms with com
 [![npm version](https://badge.fury.io/js/@bsdiff-rust%2Fnode.svg)](https://badge.fury.io/js/@bsdiff-rust%2Fnode)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[Chinese README](./README-ZH.md)
+
 ## ✨ Core Features
 
 - **Extreme Performance**: Rust implementation with memory mapping and parallel processing
