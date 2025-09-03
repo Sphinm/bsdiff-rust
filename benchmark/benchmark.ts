@@ -2,13 +2,12 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
 import { Bench } from 'tinybench'
 import bsdiff from '../index'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+// Test resources directory (relative to project root)
+const RESOURCES_DIR = path.resolve(process.cwd(), 'test/resources')
+const TEMP_DIR = path.resolve(process.cwd(), 'temp')
 
 // 定义类型
 interface TestResult {
@@ -88,9 +87,9 @@ function createTempFiles(
   patchFile: string
   cleanup: () => void
 } {
-  const oldFile = path.join(__dirname, `../temp/old_${prefix}.bin`)
-  const newFile = path.join(__dirname, `../temp/new_${prefix}.bin`)
-  const patchFile = path.join(__dirname, `../temp/patch_${prefix}.bin`)
+  const oldFile = path.join(TEMP_DIR, `old_${prefix}.bin`)
+  const newFile = path.join(TEMP_DIR, `new_${prefix}.bin`)
+  const patchFile = path.join(TEMP_DIR, `patch_${prefix}.bin`)
 
   // 确保临时目录存在
   const tempDir = path.dirname(oldFile)
@@ -260,49 +259,6 @@ async function benchmarkUtils(): Promise<void> {
   cleanup()
 }
 
-// 单独测试大文件性能（可选）
-async function benchmarkLargeFile(): Promise<void> {
-  console.log('\n🐘 测试大文件性能 (5MB)')
-  console.log('='.repeat(50))
-  console.log('⚠️  注意：此测试可能需要较长时间，请耐心等待...')
-
-  const size = 5 * 1024 * 1024 // 5MB
-  const oldData = generateTestData(size)
-  const newData = generateDiffData(oldData, 0.1)
-  const { oldFile, newFile, patchFile, cleanup } = createTempFiles(oldData, newData, 'large')
-
-  try {
-    console.log('📝 正在生成补丁文件...')
-    const startTime = Date.now()
-    await bsdiff.diff(oldFile, newFile, patchFile)
-    const diffTime = Date.now() - startTime
-    console.log(`✅ 补丁生成完成，耗时: ${formatTime(diffTime)}`)
-
-    const bench = new Bench({
-      time: 5000, // 运行5秒
-      iterations: 2, // 最少2次迭代
-      warmupTime: 500, // 预热500ms
-    })
-
-    bench.add('diff 5MB', async () => {
-      await bsdiff.diff(oldFile, newFile, patchFile)
-    })
-
-    await bench.run()
-    console.table(bench.table())
-
-    // 显示额外信息
-    const info = bsdiff.getPatchInfoSync(patchFile)
-    const ratio = bsdiff.getCompressionRatioSync(oldFile, newFile, patchFile)
-    console.log(`   补丁大小: ${formatFileSize(info.size)}`)
-    console.log(`   压缩比: ${(ratio.ratio * 100).toFixed(2)}%`)
-  } catch (error) {
-    console.error('❌ 大文件测试失败:', (error as Error).message)
-  } finally {
-    cleanup()
-  }
-}
-
 // 测试补丁应用性能
 async function benchmarkPatch(): Promise<void> {
   console.log('\n🔧 测试补丁应用性能')
@@ -316,7 +272,7 @@ async function benchmarkPatch(): Promise<void> {
   // 先生成补丁
   await bsdiff.diff(oldFile, newFile, patchFile)
 
-  const appliedFile = path.join(__dirname, '../temp/applied_patch.bin')
+  const appliedFile = path.join(TEMP_DIR, 'applied_patch.bin')
 
   const bench = new Bench({
     time: 1000,
@@ -380,17 +336,190 @@ async function benchmarkComprehensive(): Promise<void> {
   console.table(bench.table())
 }
 
+// 测试真实文件性能
+async function benchmarkRealFiles(): Promise<void> {
+  console.log('\n📁 测试真实文件性能')
+  console.log('='.repeat(50))
+
+  const realFiles = [
+    {
+      name: 'React 18.1.0 → 19.1.0',
+      oldFile: path.join(RESOURCES_DIR, 'react-18.1.0.zip'),
+      newFile: path.join(RESOURCES_DIR, 'react-19.1.0.zip'),
+    },
+  ]
+
+  for (const { name, oldFile, newFile } of realFiles) {
+    // 检查文件是否存在cls
+    if (!fs.existsSync(oldFile) || !fs.existsSync(newFile)) {
+      console.log(`⚠️  跳过 ${name}: 测试文件不存在`)
+      continue
+    }
+
+    console.log(`\n🧪 测试真实文件: ${name}`)
+
+    const oldSize = fs.statSync(oldFile).size
+    const newSize = fs.statSync(newFile).size
+    console.log(`   文件大小: ${formatFileSize(oldSize)} → ${formatFileSize(newSize)}`)
+
+    const patchFile = path.join(TEMP_DIR, `real_patch_${Date.now()}.bin`)
+    const appliedFile = path.join(TEMP_DIR, `real_applied_${Date.now()}.bin`)
+
+    // 确保临时目录存在
+    const tempDir = path.dirname(patchFile)
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true })
+    }
+
+    const bench = new Bench({
+      time: 5000, // 真实文件测试运行5秒
+      iterations: 2, // 最少2次迭代
+      warmupTime: 1000, // 预热1秒
+    })
+
+    bench
+      .add(`diff ${name}`, async () => {
+        await bsdiff.diff(oldFile, newFile, patchFile)
+      })
+      .add(`patch ${name}`, async () => {
+        await bsdiff.patch(oldFile, appliedFile, patchFile)
+      })
+      .add(`verify ${name}`, async () => {
+        await bsdiff.verifyPatch(oldFile, newFile, patchFile)
+      })
+
+    await bench.run()
+    console.table(bench.table())
+
+    // 显示补丁信息
+    try {
+      const info = bsdiff.getPatchInfoSync(patchFile)
+      const ratio = bsdiff.getCompressionRatioSync(oldFile, newFile, patchFile)
+      console.log(`   补丁大小: ${formatFileSize(info.size)}`)
+      console.log(`   压缩比: ${ratio.ratio.toFixed(2)}%`)
+      console.log(`   压缩效率: ${(((oldSize + newSize - info.size) / (oldSize + newSize)) * 100).toFixed(2)}%`)
+    } catch (error) {
+      console.log(`   ⚠️  无法获取补丁信息: ${(error as Error).message}`)
+    }
+
+    // 清理临时文件
+    try {
+      if (fs.existsSync(patchFile)) fs.unlinkSync(patchFile)
+      if (fs.existsSync(appliedFile)) fs.unlinkSync(appliedFile)
+    } catch (error) {
+      // 忽略清理错误
+    }
+  }
+}
+
+// 对比测试 - 同步 vs 异步性能
+async function benchmarkSyncVsAsync(): Promise<void> {
+  console.log('\n⚡ 同步 vs 异步性能对比')
+  console.log('='.repeat(50))
+
+  const sizes = [
+    { name: '10KB', size: 10 * 1024 },
+    { name: '100KB', size: 100 * 1024 },
+    { name: '1MB', size: 1024 * 1024 },
+  ]
+
+  for (const { name, size } of sizes) {
+    console.log(`\n🧪 测试文件大小: ${name}`)
+
+    const oldData = generateTestData(size)
+    const newData = generateDiffData(oldData, 0.1)
+    const { oldFile, newFile, patchFile, cleanup } = createTempFiles(oldData, newData, `sync_${name}`)
+
+    const bench = new Bench({
+      time: 2000,
+      iterations: 5,
+      warmupTime: 200,
+    })
+
+    bench
+      .add(`diffSync ${name}`, () => {
+        bsdiff.diffSync(oldFile, newFile, patchFile)
+      })
+      .add(`diff async ${name}`, async () => {
+        await bsdiff.diff(oldFile, newFile, patchFile)
+      })
+      .add(`patchSync ${name}`, () => {
+        bsdiff.patchSync(oldFile, patchFile + '.applied', patchFile)
+      })
+      .add(`patch async ${name}`, async () => {
+        await bsdiff.patch(oldFile, patchFile + '.applied2', patchFile)
+      })
+
+    await bench.run()
+    console.table(bench.table())
+
+    cleanup()
+  }
+}
+
+// 内存使用基准测试
+async function benchmarkMemoryUsage(): Promise<void> {
+  console.log('\n🧠 内存使用基准测试')
+  console.log('='.repeat(50))
+
+  const sizes = [
+    { name: '1MB', size: 1024 * 1024 },
+    { name: '5MB', size: 5 * 1024 * 1024 },
+    { name: '10MB', size: 10 * 1024 * 1024 },
+  ]
+
+  for (const { name, size } of sizes) {
+    console.log(`\n🧪 测试内存使用: ${name}`)
+
+    const oldData = generateTestData(size)
+    const newData = generateDiffData(oldData, 0.1)
+    const { oldFile, newFile, patchFile, cleanup } = createTempFiles(oldData, newData, `mem_${name}`)
+
+    // 记录初始内存
+    const initialMemory = process.memoryUsage()
+
+    // 执行操作
+    const startTime = Date.now()
+    await bsdiff.diff(oldFile, newFile, patchFile)
+    const diffTime = Date.now() - startTime
+
+    // 记录峰值内存
+    const peakMemory = process.memoryUsage()
+
+    console.log(`   处理时间: ${formatTime(diffTime)}`)
+    console.log(`   内存增长: ${formatFileSize(peakMemory.heapUsed - initialMemory.heapUsed)}`)
+    console.log(`   RSS 增长: ${formatFileSize(peakMemory.rss - initialMemory.rss)}`)
+    console.log(`   内存效率: ${(size / (peakMemory.heapUsed - initialMemory.heapUsed)).toFixed(2)}x`)
+
+    cleanup()
+
+    // 强制垃圾回收（如果可用）
+    if (global.gc) {
+      global.gc()
+    }
+  }
+}
+
 // 主函数
 async function main(): Promise<void> {
-  console.log('🚀 bsdiff-rust 性能基准测试 (使用 tinybench)')
+  console.log('🚀 bsdiff-rust Performance Benchmarks')
   console.log('='.repeat(60))
 
   try {
+    // 测试真实文件
+    await benchmarkRealFiles()
+
     // 测试不同文件大小
     await benchmarkDifferentSizes()
 
+    // 同步 vs 异步对比
+    await benchmarkSyncVsAsync()
+
     // 测试不同变化比例
     await benchmarkChangeRatios()
+
+    // 内存使用测试
+    await benchmarkMemoryUsage()
 
     // 测试工具方法
     await benchmarkUtils()
@@ -402,9 +531,10 @@ async function main(): Promise<void> {
     await benchmarkComprehensive()
 
     console.log('\n✅ 基准测试完成！')
-    console.log('\n📊 测试总结:')
     console.log('   - 使用 tinybench 进行现代化基准测试')
-    console.log('   - 包含预热时间和多次迭代')
+    console.log('   - 包含真实文件和合成数据测试')
+    console.log('   - 测试同步和异步API性能')
+    console.log('   - 监控内存使用情况')
     console.log('   - 提供详细的性能统计信息')
     console.log('   - 自动清理临时文件')
   } catch (error) {
@@ -414,7 +544,7 @@ async function main(): Promise<void> {
 }
 
 // 运行基准测试
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && process.argv[1].endsWith('benchmark.ts')) {
   main()
 }
 

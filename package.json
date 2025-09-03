@@ -1,6 +1,6 @@
 {
   "name": "@bsdiff-rust/node",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A high-performance Rust implementation of bsdiff and bspatch algorithms with Node.js bindings",
   "main": "index.js",
   "types": "index.d.ts",
@@ -57,10 +57,9 @@
     "format:toml": "taplo format",
     "format:rs": "cargo fmt",
     "lint": "oxlint .",
-    "test": "mocha test/test.js",
+    "test": "mocha --require ts-node/register test/index.ts",
     "version": "napi version",
-    "bench": "node --import @oxc-node/core/register benchmark/benchmark.ts",
-    "bench:rust": "cargo bench"
+    "bench": "node --import @oxc-node/core/register benchmark/benchmark.ts"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.0.3",
@@ -76,6 +75,7 @@
     "oxlint": "^1.8.0",
     "prettier": "^3.6.2",
     "tinybench": "^5.0.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   },
