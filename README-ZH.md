@@ -1,6 +1,6 @@
 # 🚀 bsdiff-rust
 
-一个高性能的 Rust 实现的 bsdiff 和 bspatch 算法库，提供完整的 Node.js 绑定
+一个基于 Rust + NAPI-RS 的高性能二进制差分补丁库，为 Node.js 提供优化的 bsdiff/bspatch 算法实现，支持 zstd 压缩和内存映射等性能优化
 
 [![npm version](https://badge.fury.io/js/@bsdiff-rust%2Fnode.svg)](https://badge.fury.io/js/@bsdiff-rust%2Fnode)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

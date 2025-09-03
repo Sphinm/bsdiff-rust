@@ -1,6 +1,6 @@
 # 🚀 bsdiff-rust
 
-A high-performance Rust implementation of bsdiff and bspatch algorithms with complete Node.js bindings
+A high-performance binary differential patching library based on Rust and NAPI-RS, providing an optimized bsdiff/bspatch algorithm implementation for Node.js, supporting performance optimizations such as zstd compression and memory mapping.
 
 [![npm version](https://badge.fury.io/js/@bsdiff-rust%2Fnode.svg)](https://badge.fury.io/js/@bsdiff-rust%2Fnode)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
