@@ -10,8 +10,8 @@ version     = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-bsdiff      = "0.2.1"
-zstd        = "0.13"      # 高性能压缩算法
+bzip2       = "0.4"       # 标准 bsdiff 压缩算法
+zstd        = "0.13"      # 高性能 Zstd 压缩算法
 memmap2     = "0.9"       # 内存映射支持
 rayon       = "1.8"       # 并行处理支持
 napi        = "3.0.0"

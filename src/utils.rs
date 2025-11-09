@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Read, BufReader};
-use zstd::stream::Decoder as ZstdDecoder;
+use crate::bsdiff_optimized::OptimizedBsdiff;
 
 /// 补丁文件信息
 #[derive(Debug, Clone)]
@@ -31,10 +31,8 @@ pub fn verify_patch(old_file: &str, new_file: &str, patch_file: &str) -> Result<
     
     // 应用补丁到临时数据
     let patch_file = File::open(patch_file)?;
-    let mut reader = ZstdDecoder::new(patch_file)?;
-    let mut patched_data = Vec::new();
     
-    bsdiff::patch(&old_data, &mut reader, &mut patched_data)?;
+    let patched_data = OptimizedBsdiff::patch(&old_data, patch_file, new_data.len())?;
     
     // 比较结果
     Ok(patched_data == new_data)

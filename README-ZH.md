@@ -384,6 +384,7 @@ buffer_size: 64 * 1024, // 64KB 缓冲区
 - [NAPI-RS 文档](https://napi.rs/) - Node.js 绑定框架
 - [Rust 官方文档](https://www.rust-lang.org/) - Rust 编程语言
 - [zstd 压缩算法](https://github.com/facebook/zstd) - Facebook 开源的压缩算法
+- [bsdiff-node](https://github.com/gaetandezeiraud/bsdiff-node) 历史使用的 bsdiff node 实现
 
 ---
 

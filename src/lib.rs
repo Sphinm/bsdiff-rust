@@ -1,7 +1,9 @@
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 
+mod bsdiff_optimized;
 mod bsdiff_rust;
+mod bsdiff_zstd;
 mod utils;
 use bsdiff_rust::BsdiffRust;
 use utils::{verify_patch as verify_patch_util, get_patch_info, get_file_size, check_file_access, get_compression_ratio};

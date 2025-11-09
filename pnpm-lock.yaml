@@ -20,6 +20,9 @@ devDependencies:
   '@types/node':
     specifier: ^24.3.0
     version: 24.3.0
+  bsdiff-node:
+    specifier: ^2.5.0
+    version: 2.5.0
   chalk:
     specifier: ^5.4.1
     version: 5.5.0
@@ -1651,6 +1654,13 @@ packages:
     resolution: {integrity: sha512-qhAVI1+Av2X7qelOfAIYwXONood6XlZE/fXaBSmW/T5SzLAmCgzi+eiWE7fUvbHaeNBQH13UftjpXxsfLkMpgw==}
     dev: true
 
+  /bsdiff-node@2.5.0:
+    resolution: {integrity: sha512-efTHSHFd/t65Ui7HiGOGr5dMg7X35zHOHWPVngpkEbsr4UtwkHi/BZ5AFFIeVo6Tp4yNX3T62uW2E00ptJrifg==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.23.0
+    dev: true
+
   /camelcase@6.3.0:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
@@ -2169,6 +2179,10 @@ packages:
   /mute-stream@2.0.0:
     resolution: {integrity: sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
+    dev: true
+
+  /nan@2.23.0:
+    resolution: {integrity: sha512-1UxuyYGdoQHcGg87Lkqm3FzefucTa0NAiOcuRsDmysep3c1LVCRK2krrUDafMWtjSG04htvAmvg96+SDknOmgQ==}
     dev: true
 
   /nano-spawn@1.0.2:
