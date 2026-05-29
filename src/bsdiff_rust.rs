@@ -4,18 +4,16 @@ use std::time::Instant;
 use qbsdiff::{Bsdiff, Bspatch, ParallelScheme};
 use qbsdiff::bsdiff::MAX_LENGTH;
 
+use crate::utils::compression_ratio_percent;
+
 /// Performance statistics.
 #[derive(Debug, Clone)]
 pub struct PerformanceStats {
-    /// Elapsed time in milliseconds.
     pub elapsed_ms: u64,
-    /// Old file size in bytes.
     pub old_size: u64,
-    /// New file size in bytes.
     pub new_size: u64,
-    /// Patch file size in bytes.
     pub patch_size: u64,
-    /// Compression ratio as a percentage.
+    /// patch_size / new_size as a percentage.
     pub compression_ratio: f64,
 }
 
@@ -37,38 +35,49 @@ impl Default for DiffOptions {
     }
 }
 
+/// Validate that a file path points to an existing regular file.
+fn validate_input(path: &str, label: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let p = Path::new(path);
+    if !p.exists() {
+        return Err(format!("{} not found: {}", label, path).into());
+    }
+    if !p.is_file() {
+        return Err(format!("{} is not a file: {}", label, path).into());
+    }
+    Ok(())
+}
+
 pub struct BsdiffRust;
 
 impl BsdiffRust {
     /// Generate a standard BSDIFF40 format patch file.
-    pub fn diff(old_file: &str, new_file: &str, patch_file: &str) -> Result<(), Box<dyn std::error::Error>> {
-        Self::diff_with_options(old_file, new_file, patch_file, &DiffOptions::default())
+    pub fn diff(old_path: &str, new_path: &str, patch_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        Self::diff_with_options(old_path, new_path, patch_path, &DiffOptions::default())
     }
 
     /// Generate a patch file with custom options.
     pub fn diff_with_options(
-        old_file: &str, 
-        new_file: &str, 
-        patch_file: &str,
-        options: &DiffOptions
+        old_path: &str,
+        new_path: &str,
+        patch_path: &str,
+        options: &DiffOptions,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        // Validate input files
-        if !Path::new(old_file).exists() {
-            return Err(format!("Old file not found: {}", old_file).into());
-        }
-        if !Path::new(new_file).exists() {
-            return Err(format!("New file not found: {}", new_file).into());
-        }
+        validate_input(old_path, "Old file")?;
+        validate_input(new_path, "New file")?;
 
-        let old_data = std::fs::read(old_file)?;
-        let new_data = std::fs::read(new_file)?;
+        let old_data = std::fs::read(old_path)?;
+        let new_data = std::fs::read(new_path)?;
 
-        // Check file size limit
         if old_data.len() > MAX_LENGTH {
             return Err(format!(
-                "Old file too large: {} bytes (max: {} bytes)", 
-                old_data.len(), 
-                MAX_LENGTH
+                "Old file too large: {} bytes (max: {} bytes)",
+                old_data.len(), MAX_LENGTH
+            ).into());
+        }
+        if new_data.len() > MAX_LENGTH {
+            return Err(format!(
+                "New file too large: {} bytes (max: {} bytes)",
+                new_data.len(), MAX_LENGTH
             ).into());
         }
 
@@ -84,110 +93,94 @@ impl BsdiffRust {
             .parallel_scheme(parallel_scheme)
             .compare(Cursor::new(&mut patch_data))?;
 
-        std::fs::write(patch_file, patch_data)?;
+        std::fs::write(patch_path, patch_data)?;
 
         Ok(())
     }
 
     /// Generate a patch file and return performance statistics.
     pub fn diff_with_stats(
-        old_file: &str, 
-        new_file: &str, 
-        patch_file: &str
+        old_path: &str,
+        new_path: &str,
+        patch_path: &str,
     ) -> Result<PerformanceStats, Box<dyn std::error::Error>> {
-        Self::diff_with_options_and_stats(old_file, new_file, patch_file, &DiffOptions::default())
+        Self::diff_with_options_and_stats(old_path, new_path, patch_path, &DiffOptions::default())
     }
 
     /// Generate a patch file with custom options and return performance statistics.
     pub fn diff_with_options_and_stats(
-        old_file: &str, 
-        new_file: &str, 
-        patch_file: &str,
-        options: &DiffOptions
+        old_path: &str,
+        new_path: &str,
+        patch_path: &str,
+        options: &DiffOptions,
     ) -> Result<PerformanceStats, Box<dyn std::error::Error>> {
         let start = Instant::now();
 
-        // Perform diff
-        Self::diff_with_options(old_file, new_file, patch_file, options)?;
+        Self::diff_with_options(old_path, new_path, patch_path, options)?;
 
         let elapsed = start.elapsed();
-
-        // Collect statistics
-        let old_size = std::fs::metadata(old_file)?.len();
-        let new_size = std::fs::metadata(new_file)?.len();
-        let patch_size = std::fs::metadata(patch_file)?.len();
-
-        let compression_ratio = if old_size + new_size > 0 {
-            (patch_size as f64 / (old_size + new_size) as f64) * 100.0
-        } else {
-            0.0
-        };
+        let old_size = std::fs::metadata(old_path)?.len();
+        let new_size = std::fs::metadata(new_path)?.len();
+        let patch_size = std::fs::metadata(patch_path)?.len();
 
         Ok(PerformanceStats {
             elapsed_ms: elapsed.as_millis() as u64,
             old_size,
             new_size,
             patch_size,
-            compression_ratio,
+            compression_ratio: compression_ratio_percent(patch_size, new_size),
         })
     }
 
     /// Apply a standard BSDIFF40 format patch file.
-    pub fn patch(old_file: &str, new_file: &str, patch_file: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // Validate input files
-        if !Path::new(old_file).exists() {
-            return Err(format!("Old file not found: {}", old_file).into());
-        }
-        if !Path::new(patch_file).exists() {
-            return Err(format!("Patch file not found: {}", patch_file).into());
+    pub fn patch(old_path: &str, new_path: &str, patch_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        validate_input(old_path, "Old file")?;
+        validate_input(patch_path, "Patch file")?;
+
+        let old_data = std::fs::read(old_path)?;
+
+        if old_data.len() > MAX_LENGTH {
+            return Err(format!(
+                "Old file too large: {} bytes (max: {} bytes)",
+                old_data.len(), MAX_LENGTH
+            ).into());
         }
 
-        // Read files
-        let old_data = std::fs::read(old_file)?;
-        let patch_data = std::fs::read(patch_file)?;
-
-        // Apply patch with pre-allocated buffer for better performance
+        let patch_data = std::fs::read(patch_path)?;
         let patcher = Bspatch::new(&patch_data)?;
-        // Pre-allocate target size to reduce memory reallocations
-        let mut new_data = Vec::with_capacity(patcher.hint_target_size() as usize);
+
+        let hint = patcher.hint_target_size();
+        let cap = usize::try_from(hint)
+            .map_err(|_| format!("Target file size too large for this platform: {} bytes", hint))?;
+        let mut new_data = Vec::with_capacity(cap);
         patcher.apply(&old_data, Cursor::new(&mut new_data))?;
 
-        // Write output file
-        std::fs::write(new_file, new_data)?;
+        std::fs::write(new_path, new_data)?;
 
         Ok(())
     }
 
     /// Apply a patch file and return performance statistics.
     pub fn patch_with_stats(
-        old_file: &str, 
-        new_file: &str, 
-        patch_file: &str
+        old_path: &str,
+        new_path: &str,
+        patch_path: &str,
     ) -> Result<PerformanceStats, Box<dyn std::error::Error>> {
         let start = Instant::now();
 
-        // Perform patch
-        Self::patch(old_file, new_file, patch_file)?;
+        Self::patch(old_path, new_path, patch_path)?;
 
         let elapsed = start.elapsed();
-
-        // Collect statistics
-        let old_size = std::fs::metadata(old_file)?.len();
-        let new_size = std::fs::metadata(new_file)?.len();
-        let patch_size = std::fs::metadata(patch_file)?.len();
-
-        let compression_ratio = if old_size + new_size > 0 {
-            (patch_size as f64 / (old_size + new_size) as f64) * 100.0
-        } else {
-            0.0
-        };
+        let old_size = std::fs::metadata(old_path)?.len();
+        let new_size = std::fs::metadata(new_path)?.len();
+        let patch_size = std::fs::metadata(patch_path)?.len();
 
         Ok(PerformanceStats {
             elapsed_ms: elapsed.as_millis() as u64,
             old_size,
             new_size,
             patch_size,
-            compression_ratio,
+            compression_ratio: compression_ratio_percent(patch_size, new_size),
         })
     }
 }
@@ -197,101 +190,97 @@ mod tests {
     use super::*;
     use std::fs;
     use tempfile::NamedTempFile;
-    
+
     #[test]
     fn test_qbsdiff_diff_patch() {
         let old_content = b"Hello World! This is the old version with some content.";
         let new_content = b"Hello World! This is the new version with more content and changes.";
-        
+
         let old_file = NamedTempFile::new().unwrap();
         let new_file = NamedTempFile::new().unwrap();
         let patch_file = NamedTempFile::new().unwrap();
-        
+
         fs::write(&old_file, old_content).unwrap();
         fs::write(&new_file, new_content).unwrap();
-        
-        // Generate BSDIFF40 format patch
+
         BsdiffRust::diff(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
-        
-        // Verify patch file header
+
         let patch_data = fs::read(patch_file.path()).unwrap();
-        assert_eq!(&patch_data[0..8], b"BSDIFF40", "Patch should have BSDIFF40 header");
-        
-        // Apply patch
+        assert_eq!(&patch_data[0..8], b"BSDIFF40");
+
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
-        
+
         let generated_content = fs::read(generated_file.path()).unwrap();
-        assert_eq!(generated_content, new_content, "Patched content should match new content");
+        assert_eq!(generated_content, new_content);
     }
 
     #[test]
     fn test_diff_with_stats() {
         let old_content = b"Hello World! This is the old version.";
         let new_content = b"Hello World! This is the new version with more data.";
-        
+
         let old_file = NamedTempFile::new().unwrap();
         let new_file = NamedTempFile::new().unwrap();
         let patch_file = NamedTempFile::new().unwrap();
-        
+
         fs::write(&old_file, old_content).unwrap();
         fs::write(&new_file, new_content).unwrap();
-        
-        // Generate patch and collect statistics
+
         let stats = BsdiffRust::diff_with_stats(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
-        
-        // elapsed_ms is u64, always >= 0; just verify the field is accessible
-        let _ = stats.elapsed_ms;
+
         assert_eq!(stats.old_size, old_content.len() as u64);
         assert_eq!(stats.new_size, new_content.len() as u64);
         assert!(stats.patch_size > 0);
-        assert!(stats.compression_ratio >= 0.0);
+        assert!(stats.compression_ratio > 0.0);
+
+        let expected_ratio = (stats.patch_size as f64 / stats.new_size as f64) * 100.0;
+        assert!((stats.compression_ratio - expected_ratio).abs() < f64::EPSILON);
     }
 
     #[test]
     fn test_diff_with_options() {
         let old_content = b"Test data for parallel option";
         let new_content = b"Test data for parallel option modified";
-        
+
         let old_file = NamedTempFile::new().unwrap();
         let new_file = NamedTempFile::new().unwrap();
         let patch_file = NamedTempFile::new().unwrap();
-        
+
         fs::write(&old_file, old_content).unwrap();
         fs::write(&new_file, new_content).unwrap();
-        
+
         let options = DiffOptions {
             compression_level: 9,
             enable_parallel: false,
         };
-        
+
         BsdiffRust::diff_with_options(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
             &options,
         ).unwrap();
-        
-        // Verify patch can be applied correctly
+
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
-        
+
         let generated_content = fs::read(generated_file.path()).unwrap();
         assert_eq!(generated_content, new_content);
     }
@@ -299,8 +288,7 @@ mod tests {
     #[test]
     fn test_file_not_found_errors() {
         let temp = NamedTempFile::new().unwrap();
-        
-        // Test diff with non-existent old file
+
         let result = BsdiffRust::diff(
             "/nonexistent/old.bin",
             temp.path().to_str().unwrap(),
@@ -309,7 +297,6 @@ mod tests {
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Old file not found"));
 
-        // Test patch with non-existent patch file
         let result = BsdiffRust::patch(
             temp.path().to_str().unwrap(),
             temp.path().to_str().unwrap(),
@@ -330,14 +317,12 @@ mod tests {
         fs::write(&old_file, content).unwrap();
         fs::write(&new_file, content).unwrap();
 
-        // Diff two identical files should succeed
         BsdiffRust::diff(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
 
-        // Patch should restore the exact same content
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
@@ -346,12 +331,11 @@ mod tests {
         ).unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
-        assert_eq!(generated_content, content, "Patched content should match original for identical files");
+        assert_eq!(generated_content, content);
 
-        // Patch for identical files should exist and have a valid BSDIFF40 header
         let patch_data = fs::read(patch_file.path()).unwrap();
-        assert!(patch_data.len() >= 8, "Patch file should contain at least the BSDIFF40 header");
-        assert_eq!(&patch_data[0..8], b"BSDIFF40", "Patch should have BSDIFF40 header");
+        assert!(patch_data.len() >= 8);
+        assert_eq!(&patch_data[0..8], b"BSDIFF40");
     }
 
     #[test]
@@ -363,14 +347,12 @@ mod tests {
         fs::write(&old_file, b"").unwrap();
         fs::write(&new_file, b"").unwrap();
 
-        // Diff two empty files should succeed
         BsdiffRust::diff(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         ).unwrap();
 
-        // Patch should produce an empty file
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
@@ -379,9 +361,8 @@ mod tests {
         ).unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
-        assert!(generated_content.is_empty(), "Patched empty files should produce empty output");
+        assert!(generated_content.is_empty());
 
-        // Stats should handle zero-size files without panicking
         let stats = BsdiffRust::diff_with_stats(
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
@@ -389,7 +370,7 @@ mod tests {
         ).unwrap();
         assert_eq!(stats.old_size, 0);
         assert_eq!(stats.new_size, 0);
-        assert_eq!(stats.compression_ratio, 0.0, "Compression ratio should be 0 when both files are empty");
+        assert_eq!(stats.compression_ratio, 0.0);
     }
 
     #[test]
@@ -401,12 +382,44 @@ mod tests {
         fs::write(&old_file, b"some original content").unwrap();
         fs::write(&patch_file, b"this is not a valid bsdiff patch").unwrap();
 
-        // Applying a corrupted patch should return an error, not panic
         let result = BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             output_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
         );
-        assert!(result.is_err(), "Corrupted patch should produce an error");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_patch_info_short_file() {
+        let patch_file = NamedTempFile::new().unwrap();
+        fs::write(&patch_file, b"SHORT").unwrap();
+
+        let info = crate::utils::get_patch_info(patch_file.path().to_str().unwrap()).unwrap();
+        assert_eq!(info.size, 5);
+        assert!(!info.is_bsdiff40);
+    }
+
+    #[test]
+    fn test_patch_info_valid_header() {
+        let patch_file = NamedTempFile::new().unwrap();
+        let mut data = b"BSDIFF40".to_vec();
+        data.extend_from_slice(&[0u8; 24]);
+        fs::write(&patch_file, &data).unwrap();
+
+        let info = crate::utils::get_patch_info(patch_file.path().to_str().unwrap()).unwrap();
+        assert_eq!(info.size, 32);
+        assert!(info.is_bsdiff40);
+    }
+
+    #[test]
+    fn test_directory_as_input() {
+        let temp = NamedTempFile::new().unwrap();
+        let dir = std::env::temp_dir();
+        let dir_str = dir.to_str().unwrap();
+
+        let result = BsdiffRust::diff(dir_str, temp.path().to_str().unwrap(), temp.path().to_str().unwrap());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("is not a file"));
     }
 }

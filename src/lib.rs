@@ -10,12 +10,10 @@ use utils::{verify_patch as verify_patch_util, get_patch_info, get_file_size, ch
 // Common type conversions and helper functions
 // ============================================================
 
-/// Convert a `Box<dyn Error>` into a `napi::Error`.
 fn to_napi_err(e: Box<dyn std::error::Error>) -> Error {
   Error::from_reason(e.to_string())
 }
 
-/// Convert `Result<T, Box<dyn Error>>` into `napi::Result<T>`.
 fn into_napi<T>(result: std::result::Result<T, Box<dyn std::error::Error>>) -> Result<T> {
   result.map_err(to_napi_err)
 }
@@ -24,14 +22,13 @@ fn into_napi<T>(result: std::result::Result<T, Box<dyn std::error::Error>>) -> R
 // JS ↔ Rust struct definitions and type conversions
 // ============================================================
 
-/// Patch file information exposed to JavaScript.
 #[napi(object)]
 pub struct PatchInfoJs {
   pub size: f64,
-  pub compressed: bool,
+  /// Whether the file has a valid BSDIFF40 format header.
+  pub is_bsdiff40: bool,
 }
 
-/// Compression ratio information exposed to JavaScript.
 #[napi(object)]
 pub struct CompressionRatioJs {
   pub old_size: f64,
@@ -40,18 +37,12 @@ pub struct CompressionRatioJs {
   pub ratio: f64,
 }
 
-/// Performance statistics exposed to JavaScript.
 #[napi(object)]
 pub struct PerformanceStatsJs {
-  /// Elapsed time in milliseconds.
   pub elapsed_ms: f64,
-  /// Old file size in bytes.
   pub old_size: f64,
-  /// New file size in bytes.
   pub new_size: f64,
-  /// Patch file size in bytes.
   pub patch_size: f64,
-  /// Compression ratio as a percentage.
   pub compression_ratio: f64,
 }
 
@@ -67,7 +58,6 @@ impl From<bsdiff_rust::PerformanceStats> for PerformanceStatsJs {
   }
 }
 
-/// Diff configuration options exposed to JavaScript.
 #[napi(object)]
 pub struct DiffOptionsJs {
   /// Compression level (0-9, default 6).
@@ -90,83 +80,74 @@ impl From<DiffOptionsJs> for DiffOptions {
 // ============================================================
 
 #[napi]
-pub fn diff_sync(old_str: String, new_str: String, patch: String) -> Result<()> {
-  into_napi(BsdiffRust::diff(&old_str, &new_str, &patch))
+pub fn diff_sync(old_path: String, new_path: String, patch_path: String) -> Result<()> {
+  into_napi(BsdiffRust::diff(&old_path, &new_path, &patch_path))
 }
 
 #[napi]
-pub fn patch_sync(old_str: String, new_str: String, patch: String) -> Result<()> {
-  into_napi(BsdiffRust::patch(&old_str, &new_str, &patch))
+pub fn patch_sync(old_path: String, new_path: String, patch_path: String) -> Result<()> {
+  into_napi(BsdiffRust::patch(&old_path, &new_path, &patch_path))
 }
 
-/// Generate a patch file and return performance statistics (sync).
 #[napi]
-pub fn diff_with_stats_sync(old_str: String, new_str: String, patch: String) -> Result<PerformanceStatsJs> {
-  into_napi(BsdiffRust::diff_with_stats(&old_str, &new_str, &patch)).map(Into::into)
+pub fn diff_with_stats_sync(old_path: String, new_path: String, patch_path: String) -> Result<PerformanceStatsJs> {
+  into_napi(BsdiffRust::diff_with_stats(&old_path, &new_path, &patch_path)).map(Into::into)
 }
 
-/// Apply a patch file and return performance statistics (sync).
 #[napi]
-pub fn patch_with_stats_sync(old_str: String, new_str: String, patch: String) -> Result<PerformanceStatsJs> {
-  into_napi(BsdiffRust::patch_with_stats(&old_str, &new_str, &patch)).map(Into::into)
+pub fn patch_with_stats_sync(old_path: String, new_path: String, patch_path: String) -> Result<PerformanceStatsJs> {
+  into_napi(BsdiffRust::patch_with_stats(&old_path, &new_path, &patch_path)).map(Into::into)
 }
 
-/// Generate a patch file with custom options (sync).
 #[napi]
 pub fn diff_with_options_sync(
-  old_str: String,
-  new_str: String,
-  patch: String,
+  old_path: String,
+  new_path: String,
+  patch_path: String,
   options: DiffOptionsJs,
 ) -> Result<()> {
   let opts: DiffOptions = options.into();
-  into_napi(BsdiffRust::diff_with_options(&old_str, &new_str, &patch, &opts))
+  into_napi(BsdiffRust::diff_with_options(&old_path, &new_path, &patch_path, &opts))
 }
 
-/// Generate a patch file with custom options and return performance statistics (sync).
 #[napi]
 pub fn diff_with_options_and_stats_sync(
-  old_str: String,
-  new_str: String,
-  patch: String,
+  old_path: String,
+  new_path: String,
+  patch_path: String,
   options: DiffOptionsJs,
 ) -> Result<PerformanceStatsJs> {
   let opts: DiffOptions = options.into();
-  into_napi(BsdiffRust::diff_with_options_and_stats(&old_str, &new_str, &patch, &opts)).map(Into::into)
+  into_napi(BsdiffRust::diff_with_options_and_stats(&old_path, &new_path, &patch_path, &opts)).map(Into::into)
 }
 
-/// Verify patch file integrity.
 #[napi]
-pub fn verify_patch_sync(old_str: String, new_str: String, patch: String) -> Result<bool> {
-  into_napi(verify_patch_util(&old_str, &new_str, &patch))
+pub fn verify_patch_sync(old_path: String, new_path: String, patch_path: String) -> Result<bool> {
+  into_napi(verify_patch_util(&old_path, &new_path, &patch_path))
 }
 
-/// Get patch file information.
 #[napi]
-pub fn get_patch_info_sync(patch: String) -> Result<PatchInfoJs> {
-  let info = into_napi(get_patch_info(&patch))?;
+pub fn get_patch_info_sync(patch_path: String) -> Result<PatchInfoJs> {
+  let info = into_napi(get_patch_info(&patch_path))?;
   Ok(PatchInfoJs {
     size: info.size as f64,
-    compressed: info.compressed,
+    is_bsdiff40: info.is_bsdiff40,
   })
 }
 
-/// Get file size.
 #[napi]
 pub fn get_file_size_sync(file_path: String) -> Result<f64> {
   into_napi(get_file_size(&file_path)).map(|s| s as f64)
 }
 
-/// Check file access permissions.
 #[napi]
 pub fn check_file_access_sync(file_path: String) -> Result<()> {
   into_napi(check_file_access(&file_path))
 }
 
-/// Get compression ratio information.
 #[napi]
-pub fn get_compression_ratio_sync(old_str: String, new_str: String, patch: String) -> Result<CompressionRatioJs> {
-  let ratio = into_napi(get_compression_ratio(&old_str, &new_str, &patch))?;
+pub fn get_compression_ratio_sync(old_path: String, new_path: String, patch_path: String) -> Result<CompressionRatioJs> {
+  let ratio = into_napi(get_compression_ratio(&old_path, &new_path, &patch_path))?;
   Ok(CompressionRatioJs {
     old_size: ratio.old_size as f64,
     new_size: ratio.new_size as f64,
@@ -176,194 +157,114 @@ pub fn get_compression_ratio_sync(old_str: String, new_str: String, patch: Strin
 }
 
 // ============================================================
-// Async Task definitions
+// Async Task definitions (macro to reduce boilerplate)
 // ============================================================
 
-pub struct DiffTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
+macro_rules! define_task {
+  ($name:ident { $($field:ident : $ty:ty),* $(,)? } => $output:ty, $js_value:ty, |$self:ident| $compute:expr, |$out:ident| $resolve:expr) => {
+    pub struct $name { $(pub $field: $ty),* }
+
+    #[napi]
+    impl Task for $name {
+      type Output = $output;
+      type JsValue = $js_value;
+
+      fn compute(&mut $self) -> Result<Self::Output> {
+        $compute
+      }
+
+      fn resolve(&mut self, _env: Env, $out: Self::Output) -> Result<Self::JsValue> {
+        Ok($resolve)
+      }
+    }
+  };
 }
 
-#[napi]
-impl Task for DiffTask {
-  type Output = ();
-  type JsValue = ();
+define_task!(DiffTask {
+  old_path: String, new_path: String, patch_path: String
+} => (), (), |self| {
+  into_napi(BsdiffRust::diff(&self.old_path, &self.new_path, &self.patch_path))
+}, |_output| ());
 
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(BsdiffRust::diff(&self.old_str, &self.new_str, &self.patch))
-  }
+define_task!(PatchTask {
+  old_path: String, new_path: String, patch_path: String
+} => (), (), |self| {
+  into_napi(BsdiffRust::patch(&self.old_path, &self.new_path, &self.patch_path))
+}, |_output| ());
 
-  fn resolve(&mut self, _env: Env, _output: Self::Output) -> Result<Self::JsValue> {
-    Ok(())
-  }
-}
+define_task!(VerifyPatchTask {
+  old_path: String, new_path: String, patch_path: String
+} => bool, bool, |self| {
+  into_napi(verify_patch_util(&self.old_path, &self.new_path, &self.patch_path))
+}, |output| output);
 
-pub struct PatchTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
-}
+define_task!(DiffWithStatsTask {
+  old_path: String, new_path: String, patch_path: String
+} => bsdiff_rust::PerformanceStats, PerformanceStatsJs, |self| {
+  into_napi(BsdiffRust::diff_with_stats(&self.old_path, &self.new_path, &self.patch_path))
+}, |output| output.into());
 
-#[napi]
-impl Task for PatchTask {
-  type Output = ();
-  type JsValue = ();
+define_task!(PatchWithStatsTask {
+  old_path: String, new_path: String, patch_path: String
+} => bsdiff_rust::PerformanceStats, PerformanceStatsJs, |self| {
+  into_napi(BsdiffRust::patch_with_stats(&self.old_path, &self.new_path, &self.patch_path))
+}, |output| output.into());
 
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(BsdiffRust::patch(&self.old_str, &self.new_str, &self.patch))
-  }
+define_task!(DiffWithOptionsTask {
+  old_path: String, new_path: String, patch_path: String, options: DiffOptions
+} => (), (), |self| {
+  into_napi(BsdiffRust::diff_with_options(&self.old_path, &self.new_path, &self.patch_path, &self.options))
+}, |_output| ());
 
-  fn resolve(&mut self, _env: Env, _output: Self::Output) -> Result<Self::JsValue> {
-    Ok(())
-  }
-}
-
-pub struct VerifyPatchTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
-}
-
-#[napi]
-impl Task for VerifyPatchTask {
-  type Output = bool;
-  type JsValue = bool;
-
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(verify_patch_util(&self.old_str, &self.new_str, &self.patch))
-  }
-
-  fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-    Ok(output)
-  }
-}
-
-pub struct DiffWithStatsTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
-}
-
-#[napi]
-impl Task for DiffWithStatsTask {
-  type Output = bsdiff_rust::PerformanceStats;
-  type JsValue = PerformanceStatsJs;
-
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(BsdiffRust::diff_with_stats(&self.old_str, &self.new_str, &self.patch))
-  }
-
-  fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-    Ok(output.into())
-  }
-}
-
-pub struct PatchWithStatsTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
-}
-
-#[napi]
-impl Task for PatchWithStatsTask {
-  type Output = bsdiff_rust::PerformanceStats;
-  type JsValue = PerformanceStatsJs;
-
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(BsdiffRust::patch_with_stats(&self.old_str, &self.new_str, &self.patch))
-  }
-
-  fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-    Ok(output.into())
-  }
-}
-
-pub struct DiffWithOptionsTask {
-  old_str: String,
-  new_str: String,
-  patch: String,
-  options: DiffOptions,
-}
-
-#[napi]
-impl Task for DiffWithOptionsTask {
-  type Output = ();
-  type JsValue = ();
-
-  fn compute(&mut self) -> Result<Self::Output> {
-    into_napi(BsdiffRust::diff_with_options(&self.old_str, &self.new_str, &self.patch, &self.options))
-  }
-
-  fn resolve(&mut self, _env: Env, _output: Self::Output) -> Result<Self::JsValue> {
-    Ok(())
-  }
-}
+define_task!(DiffWithOptionsAndStatsTask {
+  old_path: String, new_path: String, patch_path: String, options: DiffOptions
+} => bsdiff_rust::PerformanceStats, PerformanceStatsJs, |self| {
+  into_napi(BsdiffRust::diff_with_options_and_stats(&self.old_path, &self.new_path, &self.patch_path, &self.options))
+}, |output| output.into());
 
 // ============================================================
 // Async API exports
 // ============================================================
 
 #[napi]
-pub fn diff(
-  old_str: String,
-  new_str: String,
-  patch: String,
-) -> Result<AsyncTask<DiffTask>> {
-  Ok(AsyncTask::new(DiffTask { old_str, new_str, patch }))
+pub fn diff(old_path: String, new_path: String, patch_path: String) -> Result<AsyncTask<DiffTask>> {
+  Ok(AsyncTask::new(DiffTask { old_path, new_path, patch_path }))
 }
 
 #[napi]
-pub fn patch(
-  old_str: String,
-  new_str: String,
-  patch: String,
-) -> Result<AsyncTask<PatchTask>> {
-  Ok(AsyncTask::new(PatchTask { old_str, new_str, patch }))
+pub fn patch(old_path: String, new_path: String, patch_path: String) -> Result<AsyncTask<PatchTask>> {
+  Ok(AsyncTask::new(PatchTask { old_path, new_path, patch_path }))
 }
 
 #[napi]
-pub fn verify_patch(
-  old_str: String,
-  new_str: String,
-  patch: String,
-) -> Result<AsyncTask<VerifyPatchTask>> {
-  Ok(AsyncTask::new(VerifyPatchTask { old_str, new_str, patch }))
+pub fn verify_patch(old_path: String, new_path: String, patch_path: String) -> Result<AsyncTask<VerifyPatchTask>> {
+  Ok(AsyncTask::new(VerifyPatchTask { old_path, new_path, patch_path }))
 }
 
-/// Generate a patch file and return performance statistics (async).
 #[napi]
-pub fn diff_with_stats(
-  old_str: String,
-  new_str: String,
-  patch: String,
-) -> Result<AsyncTask<DiffWithStatsTask>> {
-  Ok(AsyncTask::new(DiffWithStatsTask { old_str, new_str, patch }))
+pub fn diff_with_stats(old_path: String, new_path: String, patch_path: String) -> Result<AsyncTask<DiffWithStatsTask>> {
+  Ok(AsyncTask::new(DiffWithStatsTask { old_path, new_path, patch_path }))
 }
 
-/// Apply a patch file and return performance statistics (async).
 #[napi]
-pub fn patch_with_stats(
-  old_str: String,
-  new_str: String,
-  patch: String,
-) -> Result<AsyncTask<PatchWithStatsTask>> {
-  Ok(AsyncTask::new(PatchWithStatsTask { old_str, new_str, patch }))
+pub fn patch_with_stats(old_path: String, new_path: String, patch_path: String) -> Result<AsyncTask<PatchWithStatsTask>> {
+  Ok(AsyncTask::new(PatchWithStatsTask { old_path, new_path, patch_path }))
 }
 
-/// Generate a patch file with custom options (async).
 #[napi]
-pub fn diff_with_options(
-  old_str: String,
-  new_str: String,
-  patch: String,
-  options: DiffOptionsJs,
-) -> Result<AsyncTask<DiffWithOptionsTask>> {
+pub fn diff_with_options(old_path: String, new_path: String, patch_path: String, options: DiffOptionsJs) -> Result<AsyncTask<DiffWithOptionsTask>> {
   let opts: DiffOptions = options.into();
-  Ok(AsyncTask::new(DiffWithOptionsTask {
-    old_str,
-    new_str,
-    patch,
-    options: opts,
-  }))
+  Ok(AsyncTask::new(DiffWithOptionsTask { old_path, new_path, patch_path, options: opts }))
+}
+
+/// Generate a patch file with custom options and return performance statistics (async).
+#[napi]
+pub fn diff_with_options_and_stats(
+  old_path: String,
+  new_path: String,
+  patch_path: String,
+  options: DiffOptionsJs,
+) -> Result<AsyncTask<DiffWithOptionsAndStatsTask>> {
+  let opts: DiffOptions = options.into();
+  Ok(AsyncTask::new(DiffWithOptionsAndStatsTask { old_path, new_path, patch_path, options: opts }))
 }
