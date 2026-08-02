@@ -119,6 +119,12 @@ jobs:
         run: |
           pnpm exec napi build --manifest-path bindings/node/Cargo.toml --target ${{ matrix.target }} --platform --release --cross-compile
 
+      # ── Copy native binding to repo root (napi outputs to bindings/node/) ──
+      - name: Copy native binding to root
+        run: |
+          cp bindings/node/*.node . 2>/dev/null || echo "No .node file in bindings/node"
+          ls -la *.node
+
       # ── sccache stats (useful for debugging) ──
       - name: sccache stats
         run: sccache --show-stats
@@ -290,7 +296,7 @@ jobs:
       - name: Verify npm authentication
         run: |
           echo "Verifying npm authentication..."
-          npm whoami --registry=https://registry.npmjs.org || echo "Authentication check failed"
+          npm whoami --registry=https://registry.npmjs.org
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
