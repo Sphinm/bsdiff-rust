@@ -1,0 +1,15 @@
+[package]
+name        = "bsdiff-android"
+description = "Android JNI bindings for bsdiff-core"
+authors     = { workspace = true }
+edition     = { workspace = true }
+version     = { workspace = true }
+license     = { workspace = true }
+
+[lib]
+crate-type = ["cdylib"]
+name       = "bsdiff_core"
+
+[dependencies]
+bsdiff-core = { path = "../../../core" }
+jni         = "0.21"

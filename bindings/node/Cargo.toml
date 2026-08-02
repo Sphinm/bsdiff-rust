@@ -1,0 +1,22 @@
+[package]
+name        = "bsdiff-node"
+description = "Node.js bindings for bsdiff-core via napi-rs"
+authors     = { workspace = true }
+edition     = { workspace = true }
+version     = { workspace = true }
+license     = { workspace = true }
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bsdiff-core = { path = "../../core" }
+napi        = "3.0.0"
+napi-derive = "3.0.0"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto   = true
+strip = "symbols"

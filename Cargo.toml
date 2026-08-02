@@ -1,25 +1,17 @@
+[workspace]
+members = ["core", "bindings/node", "bindings/android/rust"]
+resolver = "2"
 
-[package]
+[workspace.package]
 authors     = ["min.su <sumin1500160640@gmail.com>"]
-description = "A Rust implementation of bsdiff and bspatch"
+description = "A Rust implementation of bsdiff and bspatch — multi-platform"
 edition     = "2021"
-name        = "node"
 version     = "0.1.0"
+license     = "MIT"
 
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-qbsdiff     = "1.4.4"     # 快速、标准 BSDIFF40 格式生成器（内置 rayon 并行处理）
-tempfile    = "3.8"       # 临时文件支持
-napi        = "3.0.0"
-napi-derive = "3.0.0"
-
-[dev-dependencies]
+[workspace.dependencies]
+qbsdiff  = "1.4.4"
 tempfile = "3.8"
-
-[build-dependencies]
-napi-build = "2"
 
 [profile.release]
 lto   = true

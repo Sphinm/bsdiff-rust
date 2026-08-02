@@ -1,0 +1,18 @@
+[package]
+name        = "bsdiff-core"
+description = "Core bsdiff engine with C FFI — platform-agnostic"
+authors     = { workspace = true }
+edition     = { workspace = true }
+version     = { workspace = true }
+license     = { workspace = true }
+
+[lib]
+crate-type = ["staticlib", "lib"]
+
+[dependencies]
+qbsdiff  = { workspace = true }
+tempfile = { workspace = true }
+
+[profile.release]
+lto   = true
+strip = "symbols"
