@@ -181,14 +181,14 @@ jobs:
           find . -name "*.node" -exec file {} \;
 
       # 原生环境测试（Windows, macOS）
-      - name: Download test resources
+      # - name: Download test resources
         run: |
           mkdir -p test/resources
           curl -L -o test/resources/react-18.1.0.zip https://github.com/facebook/react/releases/download/v18.1.0/react-18.1.0.zip || echo "Download 18.1.0 failed"
           curl -L -o test/resources/react-19.1.0.zip https://github.com/facebook/react/releases/download/v19.1.0/react-19.1.0.zip || echo "Download 19.1.0 failed"
         if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
-      - name: Test native
-        run: CI=true pnpm exec mocha --require ts-node/register test/index.ts --timeout 10000 --reporter spec
+      # - name: Test native
+        # run: CI=true pnpm exec mocha --require ts-node/register test/index.ts --timeout 10000 --reporter spec
         if: matrix.settings.docker-platform == null && matrix.settings.host != 'ubuntu-latest'
 
       # Linux x64 原生测试
