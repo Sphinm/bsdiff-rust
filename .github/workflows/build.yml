@@ -268,12 +268,16 @@ jobs:
       - name: create npm dirs
         run: pnpm exec napi create-npm-dirs
 
-      - name: List packages and create artifacts
+      - name: Move artifacts and create npm packages
         run: |
           echo "=== Moving artifacts ==="
+          for dir in artifacts/*/; do
+            echo "  -> copying from $dir"
+            cp "$dir"*.node . 2>/dev/null || true
+          done
+          echo "=== Files in root ==="
+          ls -la *.node || echo "No .node files"
           pnpm artifacts
-          echo "=== downloaded artifacts ==="
-          ls -la artifacts/ || echo "No artifacts directory"
           echo "=== npm dirs ==="
           ls -R ./npm
 

@@ -6,7 +6,7 @@ resolver = "2"
 authors     = ["min.su <sumin1500160640@gmail.com>"]
 description = "A Rust implementation of bsdiff and bspatch — multi-platform"
 edition     = "2021"
-version     = "0.1.0"
+version     = "0.0.5"
 license     = "MIT"
 
 [workspace.dependencies]
