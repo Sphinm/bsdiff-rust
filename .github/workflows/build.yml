@@ -173,6 +173,7 @@ jobs:
           pnpm install --no-frozen-lockfile
 
       - name: List files
+        shell: bash
         run: |
           echo "Downloaded artifacts for target: ${{ matrix.settings.target }}"
           ls -la *.node || echo "No .node files found"
