@@ -97,7 +97,7 @@ jobs:
         env:
           SDKROOT: /opt/MacOSX11.3.sdk
         run: |
-          pnpm exec napi build --target ${{ matrix.target }} --platform --release --cross-compile
+          pnpm exec napi build --manifest-path bindings/node/Cargo.toml --target ${{ matrix.target }} --platform --release --cross-compile
 
       - name: List and verify generated files
         run: |
