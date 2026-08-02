@@ -2,10 +2,6 @@ name: Zig-Cross-Compile
 
 env:
   DEBUG: 'napi:*'
-  SCCACHE_GHA_ENABLED: 'true'
-  SCCACHE_CACHE_SIZE: '2G'
-  SCCACHE_IDLE_TIMEOUT: '0'
-  RUSTC_WRAPPER: 'sccache'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -69,10 +65,6 @@ jobs:
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: cargo-registry-
 
-      # ── sccache (compiler cache, backed by GitHub Actions cache) ──
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.9
-
       - name: Install ziglang
         uses: mlugg/setup-zig@v1
         with:
@@ -124,10 +116,6 @@ jobs:
         run: |
           cp bindings/node/*.node . 2>/dev/null || echo "No .node file in bindings/node"
           ls -la *.node
-
-      # ── sccache stats (useful for debugging) ──
-      - name: sccache stats
-        run: sccache --show-stats
 
       - name: List and verify generated files
         run: |
