@@ -63,7 +63,7 @@
     "format:rs": "cargo fmt",
     "lint": "oxlint .",
     "test": "mocha --require ts-node/register test/index.ts",
-    "test:compatibility": "node test/compatibility-test.js",
+    "test:resources": "node scripts/fetch-test-resources.mjs",
     "version": "napi version",
     "bench": "node --import @oxc-node/core/register benchmark/benchmark.ts"
   },

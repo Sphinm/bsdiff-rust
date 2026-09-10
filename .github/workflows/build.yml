@@ -105,17 +105,13 @@ jobs:
           sudo apt install -y lld llvm
 
       # ── Cross build ──
+      # `--output-dir .` keeps the same layout as a local `pnpm build`: the
+      # .node file, index.js and index.d.ts all land in the repo root.
       - name: Cross build native addon
         env:
           SDKROOT: /opt/MacOSX11.3.sdk
         run: |
-          pnpm exec napi build --manifest-path bindings/node/Cargo.toml --target ${{ matrix.target }} --platform --release --cross-compile
-
-      # ── Copy native binding to repo root (napi outputs to bindings/node/) ──
-      - name: Copy native binding to root
-        run: |
-          cp bindings/node/*.node . 2>/dev/null || echo "No .node file in bindings/node"
-          ls -la *.node
+          pnpm exec napi build --manifest-path bindings/node/Cargo.toml --target ${{ matrix.target }} --platform --release --cross-compile --output-dir .
 
       - name: List and verify generated files
         run: |
@@ -136,40 +132,43 @@ jobs:
           retention-days: 30
 
   test:
-    name: Test Zig Cross Compiled ${{ matrix.settings.target }}
+    name: Test ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
+    timeout-minutes: 30
     needs:
       - build
     strategy:
       fail-fast: false
       matrix:
         settings:
+          # Every entry runs the real test suite on a host whose architecture
+          # matches the artifact. `container` marks targets whose libc differs
+          # from the runner's (musl), which need an Alpine container to load.
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
+            container: node:22-alpine
+          - host: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          - host: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            container: node:22-alpine
           - host: macos-latest
             target: aarch64-apple-darwin
-          - host: macos-15
+          - host: macos-15-intel
             target: x86_64-apple-darwin
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            docker-platform: arm64
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            docker-platform: arm64
           - host: windows-latest
             target: x86_64-pc-windows-msvc
-          - host: windows-latest
+          - host: windows-11-arm
             target: aarch64-pc-windows-msvc
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 10
           run_install: false
 
       - name: Setup Node.js
@@ -186,48 +185,32 @@ jobs:
           path: ./
 
       - name: Install dependencies
-        run: |
-          pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
-      - name: List files
+      - name: Show downloaded binding
         shell: bash
         run: |
-          echo "Downloaded artifacts for target: ${{ matrix.settings.target }}"
+          echo "Target: ${{ matrix.settings.target }} on ${{ matrix.settings.host }}"
           ls -la *.node || echo "No .node files found"
-          ls -la index.* || echo "No index files found"
-          echo "Checking file contents..."
-          find . -name "*.node" -exec file {} \;
+          find . -maxdepth 1 -name "*.node" -exec file {} \;
 
-      - name: List Linux x64 files only
+      - name: Fetch test resources
+        run: node scripts/fetch-test-resources.mjs
+
+      # ── The actual test suite (test/index.ts) ──
+      - name: Run tests
+        if: matrix.settings.container == null
+        run: pnpm test
+
+      # musl artifacts cannot be loaded by a glibc Node.js, so the same suite
+      # runs inside an Alpine container on the architecture-matched host.
+      - name: Run tests (musl container)
+        if: matrix.settings.container != null
+        shell: bash
         run: |
-          echo "Built Linux target: ${{ matrix.settings.target }}"
-          echo "Current environment:"
-          uname -a
-          ldd --version | head -1
-          echo "Available .node files:"
-          ls -la *.node || echo "No .node files found"
-          echo "Node.js version:"
-          node --version
-          echo "Skipping tests, only listing files..."
-        if: matrix.settings.target == 'x86_64-unknown-linux-gnu' || matrix.settings.target == 'x86_64-unknown-linux-musl'
-
-      - run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-        if: matrix.settings.docker-platform != null
-
-      - name: List ARM64 files with Docker
-        uses: addnab/docker-run-action@v3
-        if: matrix.settings.docker-platform != null
-        with:
-          image: node:22-alpine
-          options: --platform linux/${{ matrix.settings.docker-platform }} -v ${{ github.workspace }}:/build -w /build
-          run: |
-            echo "Built target: ${{ matrix.settings.target }} on platform: ${{ matrix.settings.docker-platform }}"
-            ls -la *.node || echo "No .node files found in workspace"
-            apk add --no-cache file
-            echo "Files after checking workspace:"
-            ls -la *.node || echo "No .node files found"
-            find . -name "*.node" -exec file {} \; || echo "No .node files to analyze"
-            echo "Skipping tests, only listing files..."
+          docker run --rm -v "$PWD:/build" -w /build \
+            ${{ matrix.settings.container }} \
+            node node_modules/mocha/bin/mocha.js --require ts-node/register test/index.ts
 
   publish:
     name: Publish to NPM

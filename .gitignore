@@ -121,3 +121,8 @@ Cargo.lock
 /npm
 /artifacts
 .DS_Store
+
+# Test fixtures fetched by `pnpm test:resources`, plus artifacts a test run
+# leaves behind when it fails (see AGENTS.md)
+test/resources/*.zip
+test/resources/*.patch
