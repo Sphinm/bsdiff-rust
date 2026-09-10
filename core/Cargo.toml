@@ -12,7 +12,3 @@ crate-type = ["staticlib", "lib"]
 [dependencies]
 qbsdiff  = { workspace = true }
 tempfile = { workspace = true }
-
-[profile.release]
-lto   = true
-strip = "symbols"

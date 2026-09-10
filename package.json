@@ -53,9 +53,9 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
-    "build:arm64": "napi build --platform --target aarch64-apple-darwin --release",
-    "build:debug": "napi build --platform",
+    "build": "napi build --manifest-path bindings/node/Cargo.toml --platform --release --output-dir .",
+    "build:arm64": "napi build --manifest-path bindings/node/Cargo.toml --platform --target aarch64-apple-darwin --release --output-dir .",
+    "build:debug": "napi build --manifest-path bindings/node/Cargo.toml --platform --output-dir .",
     "prepublishOnly": "napi prepublish -t npm",
     "format": "run-p format:prettier format:rs format:toml",
     "format:prettier": "prettier . -w",
