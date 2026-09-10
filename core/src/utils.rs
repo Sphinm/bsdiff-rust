@@ -51,7 +51,10 @@ pub fn get_patch_info(patch_path: &str) -> Result<PatchInfo, Box<dyn std::error:
     let size = metadata.len();
 
     if size < 8 {
-        return Ok(PatchInfo { size, is_bsdiff40: false });
+        return Ok(PatchInfo {
+            size,
+            is_bsdiff40: false,
+        });
     }
 
     let mut file = File::open(patch_path)?;
@@ -84,7 +87,11 @@ pub fn check_file_access(file_path: &str) -> Result<(), Box<dyn std::error::Erro
 }
 
 /// Get compression ratio information.
-pub fn get_compression_ratio(old_path: &str, new_path: &str, patch_path: &str) -> Result<CompressionRatio, Box<dyn std::error::Error>> {
+pub fn get_compression_ratio(
+    old_path: &str,
+    new_path: &str,
+    patch_path: &str,
+) -> Result<CompressionRatio, Box<dyn std::error::Error>> {
     let old_size = get_file_size(old_path)?;
     let new_size = get_file_size(new_path)?;
     let patch_size = get_file_size(patch_path)?;

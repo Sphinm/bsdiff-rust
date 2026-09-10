@@ -112,11 +112,7 @@ pub extern "C" fn bsdiff_is_valid_patch(patch_path: *const c_char) -> i32 {
 /// Generate a BSDIFF40 patch file.
 /// Returns 0 on success, -1 on error.
 #[no_mangle]
-pub extern "C" fn bsdiff(
-    old_path: *const c_char,
-    new_path: *const c_char,
-    patch_path: *const c_char,
-) -> i32 {
+pub extern "C" fn bsdiff(old_path: *const c_char, new_path: *const c_char, patch_path: *const c_char) -> i32 {
     let old = match cstr_to_str(old_path, "old_path") {
         Ok(p) => p,
         Err(()) => return -1,
@@ -141,11 +137,7 @@ pub extern "C" fn bsdiff(
 /// Apply a BSDIFF40 patch to produce a new file.
 /// Returns 0 on success, -1 on error.
 #[no_mangle]
-pub extern "C" fn bspatch(
-    old_path: *const c_char,
-    new_path: *const c_char,
-    patch_path: *const c_char,
-) -> i32 {
+pub extern "C" fn bspatch(old_path: *const c_char, new_path: *const c_char, patch_path: *const c_char) -> i32 {
     let old = match cstr_to_str(old_path, "old_path") {
         Ok(p) => p,
         Err(()) => return -1,

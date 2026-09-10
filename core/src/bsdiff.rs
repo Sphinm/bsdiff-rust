@@ -1,8 +1,8 @@
+use qbsdiff::bsdiff::MAX_LENGTH;
+use qbsdiff::{Bsdiff, Bspatch, ParallelScheme};
 use std::io::Cursor;
 use std::path::Path;
 use std::time::Instant;
-use qbsdiff::{Bsdiff, Bspatch, ParallelScheme};
-use qbsdiff::bsdiff::MAX_LENGTH;
 
 use crate::utils::compression_ratio_percent;
 
@@ -71,14 +71,18 @@ impl BsdiffRust {
         if old_data.len() > MAX_LENGTH {
             return Err(format!(
                 "Old file too large: {} bytes (max: {} bytes)",
-                old_data.len(), MAX_LENGTH
-            ).into());
+                old_data.len(),
+                MAX_LENGTH
+            )
+            .into());
         }
         if new_data.len() > MAX_LENGTH {
             return Err(format!(
                 "New file too large: {} bytes (max: {} bytes)",
-                new_data.len(), MAX_LENGTH
-            ).into());
+                new_data.len(),
+                MAX_LENGTH
+            )
+            .into());
         }
 
         let parallel_scheme = if options.enable_parallel {
@@ -142,8 +146,10 @@ impl BsdiffRust {
         if old_data.len() > MAX_LENGTH {
             return Err(format!(
                 "Old file too large: {} bytes (max: {} bytes)",
-                old_data.len(), MAX_LENGTH
-            ).into());
+                old_data.len(),
+                MAX_LENGTH
+            )
+            .into());
         }
 
         let patch_data = std::fs::read(patch_path)?;
@@ -207,7 +213,8 @@ mod tests {
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let patch_data = fs::read(patch_file.path()).unwrap();
         assert_eq!(&patch_data[0..8], b"BSDIFF40");
@@ -217,7 +224,8 @@ mod tests {
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
         assert_eq!(generated_content, new_content);
@@ -239,7 +247,8 @@ mod tests {
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq!(stats.old_size, old_content.len() as u64);
         assert_eq!(stats.new_size, new_content.len() as u64);
@@ -272,14 +281,16 @@ mod tests {
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
             &options,
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
         assert_eq!(generated_content, new_content);
@@ -321,14 +332,16 @@ mod tests {
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
         assert_eq!(generated_content, content);
@@ -351,14 +364,16 @@ mod tests {
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_file = NamedTempFile::new().unwrap();
         BsdiffRust::patch(
             old_file.path().to_str().unwrap(),
             generated_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let generated_content = fs::read(generated_file.path()).unwrap();
         assert!(generated_content.is_empty());
@@ -367,7 +382,8 @@ mod tests {
             old_file.path().to_str().unwrap(),
             new_file.path().to_str().unwrap(),
             patch_file.path().to_str().unwrap(),
-        ).unwrap();
+        )
+        .unwrap();
         assert_eq!(stats.old_size, 0);
         assert_eq!(stats.new_size, 0);
         assert_eq!(stats.compression_ratio, 0.0);
