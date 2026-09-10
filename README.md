@@ -106,11 +106,9 @@ bsdiff-rust/
 │   └── src/
 │       ├── bsdiff.rs       # diff/patch implementation
 │       ├── utils.rs        # file info, verification, compression ratio
-│       └── ffi.rs          # extern "C" exports (iOS / desktop)
+│       └── ffi.rs          # extern "C" exports (C / static linking)
 ├── bindings/
-│   ├── node/               # napi-rs binding -> node.<platform>.node
-│   ├── android/            # JNI binding + prebuilt jniLibs
-│   └── ios/                # XCFramework + Swift wrapper
+│   └── node/               # napi-rs binding -> node.<platform>.node
 ├── benchmark/
 │   └── benchmark.ts        # TypeScript benchmarks
 ├── test/

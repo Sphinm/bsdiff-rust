@@ -1,5 +1,5 @@
 [workspace]
-members = ["core", "bindings/node", "bindings/android/rust"]
+members = ["core", "bindings/node"]
 resolver = "2"
 
 [workspace.package]

@@ -89,11 +89,9 @@ bsdiff-rust/
 │   └── src/
 │       ├── bsdiff.rs       # diff/patch 实现
 │       ├── utils.rs        # 文件信息、校验、压缩比
-│       └── ffi.rs          # extern "C" 导出（iOS / 桌面端）
+│       └── ffi.rs          # extern "C" 导出（C / 静态链接）
 ├── bindings/
-│   ├── node/               # napi-rs 绑定 -> node.<platform>.node
-│   ├── android/            # JNI 绑定 + 预编译 jniLibs
-│   └── ios/                # XCFramework + Swift 封装
+│   └── node/               # napi-rs 绑定 -> node.<platform>.node
 ├── benchmark/
 │   └── benchmark.ts        # TypeScript 基准测试
 ├── test/
