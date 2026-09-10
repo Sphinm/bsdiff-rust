@@ -64,7 +64,7 @@ patch(oldFile: string, newFile: string, patchFile: string): Promise<void>
 ### 环境要求
 
 - **Node.js**: >= 20
-- **Rust**: >= 1.70
+- **Rust**: >= 1.88（napi v3 依赖要求）
 - **包管理器**: npm 或 pnpm
 
 ### 构建项目
@@ -85,18 +85,23 @@ pnpm build:debug
 
 ```
 bsdiff-rust/
-├── src/
-│   ├── lib.rs              # NAPI 绑定入口
-│   ├── bsdiff_rust.rs      # 核心 Rust 实现
-│   └── utils.rs            # 工具方法实现
+├── core/                   # bsdiff-core：平台无关引擎 + C FFI
+│   └── src/
+│       ├── bsdiff.rs       # diff/patch 实现
+│       ├── utils.rs        # 文件信息、校验、压缩比
+│       └── ffi.rs          # extern "C" 导出（iOS / 桌面端）
+├── bindings/
+│   ├── node/               # napi-rs 绑定 -> node.<platform>.node
+│   ├── android/            # JNI 绑定 + 预编译 jniLibs
+│   └── ios/                # XCFramework + Swift 封装
 ├── benchmark/
 │   └── benchmark.ts        # TypeScript 基准测试
 ├── test/
-│   ├── index.ts             # 功能测试
-│   └── resources/          # 测试资源文件
-├── index.js                # Node.js 入口
-├── index.d.ts              # TypeScript 类型定义
-├── Cargo.toml              # Rust 项目配置
+│   ├── index.ts            # 功能测试
+│   └── resources/          # 测试资源文件（未入库）
+├── index.js                # Node.js 入口（生成物）
+├── index.d.ts              # TypeScript 类型定义（生成物）
+├── Cargo.toml              # Cargo workspace 清单
 └── package.json            # Node.js 项目配置
 ```
 

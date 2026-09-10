@@ -151,12 +151,14 @@ describe('bsdiff (rust)', function () {
       const info: PatchInfoJs = getPatchInfoSync(patchFile)
 
       assert.ok('size' in info, 'Expected info to have size property')
-      assert.ok('compressed' in info, 'Expected info to have compressed property')
+      assert.ok('isBsdiff40' in info, 'Expected info to have isBsdiff40 property')
       assert.strictEqual(typeof info.size, 'number', 'Expected info.size to be a number')
-      assert.strictEqual(info.compressed, true, 'Expected info.compressed to be true')
+      assert.strictEqual(typeof info.isBsdiff40, 'boolean', 'Expected info.isBsdiff40 to be a boolean')
+      assert.strictEqual(info.isBsdiff40, true, 'Expected info.isBsdiff40 to be true for a generated patch')
       assert.ok(info.size > 0, 'Expected info.size to be greater than 0')
+      assert.strictEqual(info.size, fs.statSync(patchFile).size, 'info.size should match actual patch file size')
 
-      console.log(`📦 补丁信息: 大小=${(info.size / 1024).toFixed(2)} KB, 压缩=${info.compressed}`)
+      console.log(`📦 补丁信息: 大小=${(info.size / 1024).toFixed(2)} KB, BSDIFF40=${info.isBsdiff40}`)
     })
   })
 

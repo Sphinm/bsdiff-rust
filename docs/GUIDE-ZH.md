@@ -129,8 +129,8 @@ verifyPatch(oldFile: string, newFile: string, patchFile: string): Promise<boolea
 getPatchInfoSync(patchFile: string): PatchInfoJs
 
 interface PatchInfoJs {
-  size: number       // 补丁大小（字节）
-  compressed: boolean // 是否压缩（BSDIFF40 始终为 true）
+  size: number          // 补丁大小（字节）
+  isBsdiff40: boolean   // 文件头是否为合法的 BSDIFF40 魔术字
 }
 ```
 
@@ -226,7 +226,6 @@ try {
 ```bash
 pnpm test              # 功能测试
 pnpm run bench         # 性能基准测试
-pnpm run test:compatibility  # 兼容性测试
 ```
 
 ### 测试覆盖

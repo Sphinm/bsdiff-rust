@@ -129,8 +129,8 @@ verifyPatch(oldFile: string, newFile: string, patchFile: string): Promise<boolea
 getPatchInfoSync(patchFile: string): PatchInfoJs
 
 interface PatchInfoJs {
-  size: number       // Patch file size in bytes
-  compressed: boolean // Whether compressed (always true for BSDIFF40)
+  size: number          // Patch file size in bytes
+  isBsdiff40: boolean   // Whether the file starts with a valid BSDIFF40 header
 }
 ```
 
@@ -226,7 +226,6 @@ try {
 ```bash
 pnpm test              # Functional tests
 pnpm run bench         # Performance benchmarks
-pnpm run test:compatibility  # Compatibility tests
 ```
 
 ### Test Coverage
@@ -234,8 +233,7 @@ pnpm run test:compatibility  # Compatibility tests
 - **Functional Testing**: Sync/async API, file I/O, patch generation and application
 - **Error Handling**: Missing files, permission errors, invalid parameters, corrupted patches
 - **Performance Testing**: Different file sizes, compression levels, parallel processing
-- **Compatibility**: With bsdiff-node, cross-platform patch files
-- **Data Integrity**: MD5 checksums, file size verification
+- **Data Integrity**: Patched output byte-compared against the target file
 - **Utility Methods**: File operations, compression ratio calculations, patch info
 
 ### Writing Tests Example

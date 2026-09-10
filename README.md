@@ -46,7 +46,7 @@ await diff('old-file.zip', 'new-file.zip', 'patch.bin')
 await patch('old-file.zip', 'generated-file.zip', 'patch.bin')
 ```
 
-Need performance monitoring or custom configuration? See [Complete API Documentation](./docs/API.md)
+Need performance monitoring or custom configuration? See the [Complete Guide](./docs/GUIDE.md)
 
 ## 📖 API Documentation
 
@@ -79,7 +79,7 @@ pnpm run bench
 ### Environment Requirements
 
 - **Node.js**: >= 16 (Latest LTS recommended)
-- **Rust**: >= 1.70
+- **Rust**: >= 1.88 (required by napi v3 / edition 2024 dependencies)
 - **Package Manager**: npm or pnpm
 
 ### Building the Project
@@ -102,17 +102,23 @@ pnpm build:arm64
 
 ```
 bsdiff-rust/
-├── src/
-│   ├── lib.rs              # NAPI binding entry
-│   ├── bsdiff_rust.rs      # Core Rust implementation
+├── core/                   # bsdiff-core: platform-agnostic engine + C FFI
+│   └── src/
+│       ├── bsdiff.rs       # diff/patch implementation
+│       ├── utils.rs        # file info, verification, compression ratio
+│       └── ffi.rs          # extern "C" exports (iOS / desktop)
+├── bindings/
+│   ├── node/               # napi-rs binding -> node.<platform>.node
+│   ├── android/            # JNI binding + prebuilt jniLibs
+│   └── ios/                # XCFramework + Swift wrapper
 ├── benchmark/
 │   └── benchmark.ts        # TypeScript benchmarks
 ├── test/
 │   ├── index.ts            # Functional tests
-│   └── resources/          # Test resource files
-├── index.js                # Node.js entry point
-├── index.d.ts              # TypeScript type definitions
-├── Cargo.toml              # Rust project configuration
+│   └── resources/          # Test resource files (not in git)
+├── index.js                # Node.js entry point (generated)
+├── index.d.ts              # TypeScript type definitions (generated)
+├── Cargo.toml              # Cargo workspace manifest
 └── package.json            # Node.js project configuration
 ```
 
