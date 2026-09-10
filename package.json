@@ -64,6 +64,7 @@
     "lint": "oxlint .",
     "test": "mocha --require ts-node/register test/index.ts",
     "test:resources": "node scripts/fetch-test-resources.mjs",
+    "prepare": "husky",
     "version": "napi version",
     "bench": "node --import @oxc-node/core/register benchmark/benchmark.ts"
   },
@@ -94,11 +95,6 @@
     "*.toml": [
       "taplo format"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "prettier": {
     "printWidth": 120,
